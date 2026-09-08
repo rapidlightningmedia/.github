@@ -1,0 +1,73 @@
+# Generated from the ruled ticket-template spec (rlm-ops#484). Edit the spec, then this file, in the same motion.
+name: Discovery
+description: 'The product phase: rough mockups and the what/why/success doc. JD and Honesty''s room.'
+type: Discovery
+projects:
+- rapidlightningmedia/11
+body:
+- type: markdown
+  attributes:
+    value: |-
+      **How to write this ticket** (the full rules: `rlm-shared://_templates/tickets/ticket-templates.md`)
+
+      - Plain, simple English. Short sentences. One idea per sentence. Write for a person who opens this cold.
+      - Do not condense. Three facts are three sentences.
+      - A new idea starts a new paragraph. A blank line between paragraphs.
+      - Name a ticket as a full link: `[rlm-ops#448](https://github.com/rapidlightningmedia/rlm-ops/issues/448)`. Never a bare number.
+      - Dates as `Wed-09/02/2026`. Quotes as `"..." (JD: Wed-09/02/2026)`. Share files as `rlm-shared://path`.
+      - Tables and lists, liberally. Number every item someone may refer to later (Q1, Q2... A1, A2...).
+      - Do not invent a fact. Write "not known at birth" instead.
+- type: textarea
+  id: objective
+  attributes:
+    label: Objective
+    description: State the objective of this discovery. A restating of the goal's summary with more detail.
+  validations:
+    required: true
+- type: textarea
+  id: questions
+  attributes:
+    label: Questions
+    description: The questions this discovery must answer, numbered Q1, Q2...
+    value: "- Q1 \n"
+  validations:
+    required: true
+- type: checkboxes
+  id: artifact-checklist
+  attributes:
+    label: Artifact Checklist
+    description: Tick each artifact as it lands. The paths go in a comment.
+    options:
+    - label: A1 Screen Map
+    - label: A2 Rough Mockups
+    - label: A3 What/Why/Success doc
+- type: textarea
+  id: supporting-material
+  attributes:
+    label: Supporting Material
+    description: A table. One row per file, transcript, mockup or document that supports this ticket. Number them SM1, SM2... Share files as `rlm-shared://path`. Write `None` in the first row if there is nothing.
+    value: |
+      | ID | Description | Location |
+      |---|---|---|
+      | SM1 |  |  |
+  validations:
+    required: true
+- type: textarea
+  id: origin
+  attributes:
+    label: Origin
+    description: 'One line: **Requested by** *person* **on** *date* **@** *circumstance*. Who asked for this, when, and where.'
+    placeholder: Requested by JD on Tue-09/08/2026 @ the product meeting
+  validations:
+    required: true
+- type: textarea
+  id: related-tickets
+  attributes:
+    label: Related Tickets
+    description: A table. Every ticket this one relates to, as a full link, with the relationship in words (Parent, Origin ticket, Sibling, Blocks, Where Phase 3 lives...). Do not list children or Blocked By edges - the board shows those. Write `None` in the first row if there is nothing.
+    value: |
+      | Relationship | Ticket | Description |
+      |---|---|---|
+      |  |  |  |
+  validations:
+    required: true

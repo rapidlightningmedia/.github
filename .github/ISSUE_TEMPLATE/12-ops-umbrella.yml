@@ -1,0 +1,92 @@
+# Generated from the ruled ticket-template spec (rlm-ops#484). Edit the spec, then this file, in the same motion.
+name: Ops Umbrella
+description: 'One of the seven standing shelves (rlm-ops#412 to #418). Nobody births one without a ruling.'
+type: Ops Umbrella
+projects:
+- rapidlightningmedia/11
+body:
+- type: markdown
+  attributes:
+    value: |-
+      **How to write this ticket** (the full rules: `rlm-shared://_templates/tickets/ticket-templates.md`)
+
+      - Plain, simple English. Short sentences. One idea per sentence. Write for a person who opens this cold.
+      - Do not condense. Three facts are three sentences.
+      - A new idea starts a new paragraph. A blank line between paragraphs.
+      - Name a ticket as a full link: `[rlm-ops#448](https://github.com/rapidlightningmedia/rlm-ops/issues/448)`. Never a bare number.
+      - Dates as `Wed-09/02/2026`. Quotes as `"..." (JD: Wed-09/02/2026)`. Share files as `rlm-shared://path`.
+      - Tables and lists, liberally. Number every item someone may refer to later (SM1, SM2...).
+      - Do not invent a fact. Write "not known at birth" instead.
+- type: textarea
+  id: purpose
+  attributes:
+    label: Purpose
+    description: What this shelf holds and why it exists. It never closes; work is born here without a Decide step.
+  validations:
+    required: true
+- type: textarea
+  id: what-belongs-here
+  attributes:
+    label: What Belongs Here
+    description: 'A table: kind of work, examples, who usually does it.'
+    value: |
+      | Kind of work | Examples | Who usually does it |
+      |---|---|---|
+      |  |  |  |
+  validations:
+    required: true
+- type: textarea
+  id: what-does-not-belong-here
+  attributes:
+    label: What Does NOT Belong Here
+    description: 'A table: the work, where it goes instead.'
+    value: |
+      | Work | Where it goes instead |
+      |---|---|
+      |  |  |
+  validations:
+    required: true
+- type: textarea
+  id: whos-responsible
+  attributes:
+    label: Who's Responsible
+    description: The role and its holder, with the charter path.
+  validations:
+    required: true
+- type: textarea
+  id: how-tickets-are-added
+  attributes:
+    label: How Tickets Are Added
+    description: How work is born here and how it leaves (the quarter bucket sweep).
+  validations:
+    required: true
+- type: textarea
+  id: supporting-material
+  attributes:
+    label: Supporting Material
+    description: A table. One row per file, transcript, mockup or document that supports this ticket. Number them SM1, SM2... Share files as `rlm-shared://path`. Write `None` in the first row if there is nothing.
+    value: |
+      | ID | Description | Location |
+      |---|---|---|
+      | SM1 |  |  |
+  validations:
+    required: true
+- type: textarea
+  id: origin
+  attributes:
+    label: Origin
+    description: 'One line: **Requested by** *person* **on** *date* **@** *circumstance*. Who asked for this, when, and where.'
+    placeholder: Requested by JD on Tue-09/08/2026 @ the product meeting
+  validations:
+    required: true
+- type: textarea
+  id: related-tickets
+  attributes:
+    label: Related Tickets
+    description: A table. Every ticket this one relates to, as a full link, with the relationship in words (Parent, Origin ticket, Sibling, Blocks, Where Phase 3 lives...). Do not list children or Blocked By edges - the board shows those. Write `None` in the first row if there is nothing.
+    value: |
+      | Relationship | Ticket | Description |
+      |---|---|---|
+      |  |  |  |
+  validations:
+    required: true

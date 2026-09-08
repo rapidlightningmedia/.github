@@ -1,0 +1,77 @@
+# Generated from the ruled ticket-template spec (rlm-ops#484). Edit the spec, then this file, in the same motion.
+name: Idea
+description: A thought captured so it is not lost. Not decided yet. Tier is decided at Decide, never here.
+type: Idea
+projects:
+- rapidlightningmedia/11
+body:
+- type: markdown
+  attributes:
+    value: |-
+      **How to write this ticket** (the full rules: `rlm-shared://_templates/tickets/ticket-templates.md`)
+
+      - Plain, simple English. Short sentences. One idea per sentence. Write for a person who opens this cold.
+      - Do not condense. Three facts are three sentences.
+      - A new idea starts a new paragraph. A blank line between paragraphs.
+      - Name a ticket as a full link: `[rlm-ops#448](https://github.com/rapidlightningmedia/rlm-ops/issues/448)`. Never a bare number.
+      - Dates as `Wed-09/02/2026`. Quotes as `"..." (JD: Wed-09/02/2026)`. Share files as `rlm-shared://path`.
+      - Tables and lists, liberally. Number every item someone may refer to later (F1, F2...).
+      - Do not invent a fact. Write "not known at birth" instead.
+- type: textarea
+  id: proposed
+  attributes:
+    label: Proposed
+    description: What the idea is, in the words of the person who had it. Where it came from. One line on why it might matter.
+  validations:
+    required: true
+- type: textarea
+  id: features
+  attributes:
+    label: Features
+    description: When relevant. A table of the features named, numbered F1, F2... with what each is and where it stands.
+    value: |
+      | # | Feature | What it is | Where it stands |
+      |---|---|---|---|
+      | F1 |  |  |  |
+- type: textarea
+  id: decided-elsewhere
+  attributes:
+    label: Decided Elsewhere
+    description: When relevant. Anything already ruled on another ticket that this idea must respect, with the link.
+- type: textarea
+  id: what-happens-next
+  attributes:
+    label: What Happens Next
+    description: 'Where this idea goes from here: which Decide venue, what it waits on, or what would kill it.'
+  validations:
+    required: true
+- type: textarea
+  id: supporting-material
+  attributes:
+    label: Supporting Material
+    description: A table. One row per file, transcript, mockup or document that supports this ticket. Number them SM1, SM2... Share files as `rlm-shared://path`. Write `None` in the first row if there is nothing.
+    value: |
+      | ID | Description | Location |
+      |---|---|---|
+      | SM1 |  |  |
+  validations:
+    required: true
+- type: textarea
+  id: origin
+  attributes:
+    label: Origin
+    description: 'One line: **Requested by** *person* **on** *date* **@** *circumstance*. Who asked for this, when, and where.'
+    placeholder: Requested by JD on Tue-09/08/2026 @ the product meeting
+  validations:
+    required: true
+- type: textarea
+  id: related-tickets
+  attributes:
+    label: Related Tickets
+    description: A table. Every ticket this one relates to, as a full link, with the relationship in words (Parent, Origin ticket, Sibling, Blocks, Where Phase 3 lives...). Do not list children or Blocked By edges - the board shows those. Write `None` in the first row if there is nothing.
+    value: |
+      | Relationship | Ticket | Description |
+      |---|---|---|
+      |  |  |  |
+  validations:
+    required: true

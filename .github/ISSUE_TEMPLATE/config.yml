@@ -1,0 +1,8 @@
+# Org-wide issue chooser (rlm-ops#484). Blank issues are off on purpose:
+# every ticket is born on the form for its type, so it carries the type's
+# sections and its issue type from the first second.
+blank_issues_enabled: false
+contact_links:
+  - name: The ticket template rules
+    url: https://github.com/rapidlightningmedia/.github/blob/main/TICKET-TEMPLATES.md
+    about: Which form to pick, and how to write a ticket that reads cold.

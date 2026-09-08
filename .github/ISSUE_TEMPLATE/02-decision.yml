@@ -1,0 +1,85 @@
+# Generated from the ruled ticket-template spec (rlm-ops#484). Edit the spec, then this file, in the same motion.
+name: Decision
+description: A call that needs a ruling. Each call laid out with its context and a lean. The verdict lands as a comment.
+type: Decision
+projects:
+- rapidlightningmedia/11
+body:
+- type: markdown
+  attributes:
+    value: |-
+      **How to write this ticket** (the full rules: `rlm-shared://_templates/tickets/ticket-templates.md`)
+
+      - Plain, simple English. Short sentences. One idea per sentence. Write for a person who opens this cold.
+      - Do not condense. Three facts are three sentences.
+      - A new idea starts a new paragraph. A blank line between paragraphs.
+      - Name a ticket as a full link: `[rlm-ops#448](https://github.com/rapidlightningmedia/rlm-ops/issues/448)`. Never a bare number.
+      - Dates as `Wed-09/02/2026`. Quotes as `"..." (JD: Wed-09/02/2026)`. Share files as `rlm-shared://path`.
+      - Tables and lists, liberally. Number every item someone may refer to later (C1, C2... P1, P2...).
+      - Do not invent a fact. Write "not known at birth" instead.
+- type: textarea
+  id: question
+  attributes:
+    label: Question
+    description: The one question this ticket answers, in plain words.
+  validations:
+    required: true
+- type: textarea
+  id: prep
+  attributes:
+    label: Prep
+    description: 'When relevant. Tasks that must be done before this can be ruled, as part of this ticket''s own work. Numbered P1, P2... Each: the task in bold, then its sub-facts.'
+- type: textarea
+  id: calls
+  attributes:
+    label: Calls
+    description: 'Numbered C1, C2... Each call: the context to rule from, then a lean.'
+    value: "**C1. <the call>**\n\nContext: \n\nLean: \n"
+  validations:
+    required: true
+- type: textarea
+  id: who-answers
+  attributes:
+    label: Who Answers
+    description: Whose domain this decision is. A name or a short list. Not the assignee, which changes.
+    placeholder: JD and Honesty
+  validations:
+    required: true
+- type: textarea
+  id: verdict
+  attributes:
+    label: Verdict
+    description: 'Stays empty in the body. Before the ticket closes, a comment carries one line per call: `C1: DECIDED | PARKED | REJECTED - <the ruling>`.'
+    value: 'Filled by comment. One line per call: `C1: DECIDED | PARKED | REJECTED - <the ruling>`.'
+  validations:
+    required: true
+- type: textarea
+  id: supporting-material
+  attributes:
+    label: Supporting Material
+    description: A table. One row per file, transcript, mockup or document that supports this ticket. Number them SM1, SM2... Share files as `rlm-shared://path`. Write `None` in the first row if there is nothing.
+    value: |
+      | ID | Description | Location |
+      |---|---|---|
+      | SM1 |  |  |
+  validations:
+    required: true
+- type: textarea
+  id: origin
+  attributes:
+    label: Origin
+    description: 'One line: **Requested by** *person* **on** *date* **@** *circumstance*. Who asked for this, when, and where.'
+    placeholder: Requested by JD on Tue-09/08/2026 @ the product meeting
+  validations:
+    required: true
+- type: textarea
+  id: related-tickets
+  attributes:
+    label: Related Tickets
+    description: A table. Every ticket this one relates to, as a full link, with the relationship in words (Parent, Origin ticket, Sibling, Blocks, Where Phase 3 lives...). Do not list children or Blocked By edges - the board shows those. Write `None` in the first row if there is nothing.
+    value: |
+      | Relationship | Ticket | Description |
+      |---|---|---|
+      |  |  |  |
+  validations:
+    required: true

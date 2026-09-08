@@ -1,0 +1,111 @@
+# Generated from the ruled ticket-template spec (rlm-ops#484). Edit the spec, then this file, in the same motion.
+name: Bug
+description: Something is wrong. Symptom, expected, steps, where, impact, fix. Parent = the product's ops umbrella.
+type: Bug
+projects:
+- rapidlightningmedia/11
+body:
+- type: markdown
+  attributes:
+    value: |-
+      **How to write this ticket** (the full rules: `rlm-shared://_templates/tickets/ticket-templates.md`)
+
+      - Plain, simple English. Short sentences. One idea per sentence. Write for a person who opens this cold.
+      - Do not condense. Three facts are three sentences.
+      - A new idea starts a new paragraph. A blank line between paragraphs.
+      - Name a ticket as a full link: `[rlm-ops#448](https://github.com/rapidlightningmedia/rlm-ops/issues/448)`. Never a bare number.
+      - Dates as `Wed-09/02/2026`. Quotes as `"..." (JD: Wed-09/02/2026)`. Share files as `rlm-shared://path`.
+      - Tables and lists, liberally. Number every item someone may refer to later (S1, S2... AC1, AC2...).
+      - Do not invent a fact. Write "not known at birth" instead.
+- type: textarea
+  id: symptom
+  attributes:
+    label: Symptom
+    description: What happens. Confirmed by running it, not guessed.
+  validations:
+    required: true
+- type: textarea
+  id: expected
+  attributes:
+    label: Expected
+    description: What should happen instead.
+  validations:
+    required: true
+- type: textarea
+  id: steps-to-reproduce
+  attributes:
+    label: Steps to Reproduce
+    description: A table, numbered S1, S2...
+    value: |
+      | # | Step |
+      |---|---|
+      | S1 |  |
+  validations:
+    required: true
+- type: textarea
+  id: where
+  attributes:
+    label: Where
+    description: 'A table: repo, environment, the four-part version, first seen, how found.'
+    value: |
+      | Fact | Value |
+      |---|---|
+      | Repo |  |
+      | Environment |  |
+      | Version |  |
+      | First seen |  |
+      | How found |  |
+  validations:
+    required: true
+- type: textarea
+  id: impact
+  attributes:
+    label: Impact
+    description: Who it hurts and how much. What breaks, what does not.
+  validations:
+    required: true
+- type: textarea
+  id: fix
+  attributes:
+    label: Fix
+    description: What the fix is, or `not known yet`.
+  validations:
+    required: true
+- type: textarea
+  id: acceptance-criteria
+  attributes:
+    label: Acceptance Criteria
+    description: Numbered AC1, AC2... The checkable lines.
+    value: "- AC1 \n"
+  validations:
+    required: true
+- type: textarea
+  id: supporting-material
+  attributes:
+    label: Supporting Material
+    description: A table. One row per file, transcript, mockup or document that supports this ticket. Number them SM1, SM2... Share files as `rlm-shared://path`. Write `None` in the first row if there is nothing.
+    value: |
+      | ID | Description | Location |
+      |---|---|---|
+      | SM1 |  |  |
+  validations:
+    required: true
+- type: textarea
+  id: origin
+  attributes:
+    label: Origin
+    description: 'One line: **Requested by** *person* **on** *date* **@** *circumstance*. Who asked for this, when, and where.'
+    placeholder: Requested by JD on Tue-09/08/2026 @ the product meeting
+  validations:
+    required: true
+- type: textarea
+  id: related-tickets
+  attributes:
+    label: Related Tickets
+    description: A table. Every ticket this one relates to, as a full link, with the relationship in words (Parent, Origin ticket, Sibling, Blocks, Where Phase 3 lives...). Do not list children or Blocked By edges - the board shows those. Write `None` in the first row if there is nothing.
+    value: |
+      | Relationship | Ticket | Description |
+      |---|---|---|
+      |  |  |  |
+  validations:
+    required: true
