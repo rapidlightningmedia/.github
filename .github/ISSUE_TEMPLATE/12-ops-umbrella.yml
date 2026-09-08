@@ -14,7 +14,7 @@ body:
       - Do not condense. Three facts are three sentences.
       - A new idea starts a new paragraph. A blank line between paragraphs.
       - Name a ticket as a full link: `[rlm-ops#448](https://github.com/rapidlightningmedia/rlm-ops/issues/448)`. Never a bare number.
-      - Dates as `Wed-09/02/2026`. Quotes as `"..." (JD: Wed-09/02/2026)`. Share files as `rlm-shared://path`.
+      - Dates as `09/02/2026-Wed`. Quotes as `"..." (JD: 09/02/2026-Wed)`. Share files as `rlm-shared://path`.
       - Tables and lists, liberally. Number every item someone may refer to later (SM1, SM2...).
       - Do not invent a fact. Write "not known at birth" instead.
 - type: textarea
@@ -76,7 +76,7 @@ body:
   attributes:
     label: Origin
     description: 'One line: **Requested by** *person* **on** *date* **@** *circumstance*. Who asked for this, when, and where.'
-    placeholder: Requested by JD on Tue-09/08/2026 @ the product meeting
+    placeholder: Requested by JD on 09/08/2026-Tue @ the product meeting
   validations:
     required: true
 - type: textarea

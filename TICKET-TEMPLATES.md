@@ -31,7 +31,7 @@ Do not condense. Three facts are three sentences.
 
 A new idea starts a new paragraph. A blank line sits between paragraphs.
 
-Every section has a heading that names it, in Title Case. Name a ticket as a full link, never a bare number. Dates as `Wed-09/02/2026`. Quotes as `"..." (JD: Wed-09/02/2026)`. Share files as `rlm-shared://path`. Tables and lists, liberally. Number every item someone may refer to later.
+Every section has a heading that names it, in Title Case. Name a ticket as a full link, never a bare number. Dates as `09/02/2026-Wed`. Quotes as `"..." (JD: 09/02/2026-Wed)`. Share files as `rlm-shared://path`. Tables and lists, liberally. Number every item someone may refer to later.
 
 Every type ends with the same three sections: Supporting Material, Origin, Related Tickets.
 
