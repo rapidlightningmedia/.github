@@ -1,0 +1,76 @@
+# Generated from the ruled ticket-template spec (rlm-ops#484). Edit the spec, then this file, in the same motion.
+name: Goal
+description: The top umbrella, a roadmap row. Born with its four ceremony children (Discovery, Architecture, Design, Blueprint).
+type: Goal
+projects:
+- rapidlightningmedia/11
+body:
+- type: markdown
+  attributes:
+    value: |-
+      **How to write this ticket** (the full rules: `rlm-shared://_templates/tickets/ticket-templates.md`)
+
+      - Plain, simple English. Short sentences. One idea per sentence. Write for a person who opens this cold.
+      - Do not condense. Three facts are three sentences.
+      - A new idea starts a new paragraph. A blank line between paragraphs.
+      - Name a ticket as a full link: `[rlm-ops#448](https://github.com/rapidlightningmedia/rlm-ops/issues/448)`. Never a bare number.
+      - Dates as `09/02/2026-Wed`. Quotes as `"..." (JD: 09/02/2026-Wed)`. Share files as `rlm-shared://path`.
+      - Tables and lists, liberally. Number every item someone may refer to later (O1, O2... R1, R2...).
+      - Do not invent a fact. Write "not known at birth" instead.
+- type: textarea
+  id: summary
+  attributes:
+    label: Summary
+    description: What this goal is, in one paragraph a cold reader gets.
+  validations:
+    required: true
+- type: textarea
+  id: desired-outcome
+  attributes:
+    label: Desired Outcome
+    description: A list, numbered O1, O2... What is true when this goal is reached.
+    value: "- O1 \n- O2 \n"
+  validations:
+    required: true
+- type: textarea
+  id: build-rules
+  attributes:
+    label: Build Rules
+    description: When relevant. Rules every child under this goal must follow, numbered R1, R2...
+- type: textarea
+  id: timing
+  attributes:
+    label: Timing
+    description: 'Required. The timing in words: what has to happen first, what waits on this, and how the timing should run. Name the tickets that affect it and say how. This is not the Start and Target date fields.'
+  validations:
+    required: true
+- type: textarea
+  id: supporting-material
+  attributes:
+    label: Supporting Material
+    description: A table. One row per file, transcript, mockup or document that supports this ticket. Number them SM1, SM2... Share files as `rlm-shared://path`. Write `None` in the first row if there is nothing.
+    value: |
+      | ID | Description | Location |
+      |---|---|---|
+      | SM1 |  |  |
+  validations:
+    required: true
+- type: textarea
+  id: origin
+  attributes:
+    label: Origin
+    description: 'One line: **Requested by** *person* **on** *date* **@** *circumstance*. Who asked for this, when, and where.'
+    placeholder: Requested by JD on 09/08/2026-Tue @ the product meeting
+  validations:
+    required: true
+- type: textarea
+  id: related-tickets
+  attributes:
+    label: Related Tickets
+    description: A table. Every ticket this one relates to, as a full link, with the relationship in words (Parent, Origin ticket, Sibling, Blocks, Where Phase 3 lives...). Do not list children or Blocked By edges - the board shows those. Write `None` in the first row if there is nothing.
+    value: |
+      | Relationship | Ticket | Description |
+      |---|---|---|
+      |  |  |  |
+  validations:
+    required: true

@@ -1,0 +1,81 @@
+# Generated from the ruled ticket-template spec (rlm-ops#484). Edit the spec, then this file, in the same motion.
+name: Execute
+description: 'A workable ticket: a slice or a plain build, an ops task. Ends when the acceptance criteria are met.'
+type: Execute
+projects:
+- rapidlightningmedia/11
+body:
+- type: markdown
+  attributes:
+    value: |-
+      **How to write this ticket** (the full rules: `rlm-shared://_templates/tickets/ticket-templates.md`)
+
+      - Plain, simple English. Short sentences. One idea per sentence. Write for a person who opens this cold.
+      - Do not condense. Three facts are three sentences.
+      - A new idea starts a new paragraph. A blank line between paragraphs.
+      - Name a ticket as a full link: `[rlm-ops#448](https://github.com/rapidlightningmedia/rlm-ops/issues/448)`. Never a bare number.
+      - Dates as `09/02/2026-Wed`. Quotes as `"..." (JD: 09/02/2026-Wed)`. Share files as `rlm-shared://path`.
+      - Tables and lists, liberally. Number every item someone may refer to later (R1, R2... AC1, AC2...).
+      - Do not invent a fact. Write "not known at birth" instead.
+- type: textarea
+  id: mission
+  attributes:
+    label: Mission
+    description: What this ticket does, in one paragraph. Why it exists and where it fits.
+  validations:
+    required: true
+- type: textarea
+  id: requirements
+  attributes:
+    label: Requirements
+    description: Numbered R1, R2... What the work must do.
+    value: "- R1 \n"
+  validations:
+    required: true
+- type: textarea
+  id: potential-catches
+  attributes:
+    label: Potential Catches
+    description: The gotchas. What could go wrong, what to watch for. Write `None known` if there is nothing.
+  validations:
+    required: true
+- type: textarea
+  id: acceptance-criteria
+  attributes:
+    label: Acceptance Criteria
+    description: Numbered AC1, AC2... The checkable lines. When every one is true, the ticket is done.
+    value: "- AC1 \n"
+  validations:
+    required: true
+- type: textarea
+  id: supporting-material
+  attributes:
+    label: Supporting Material
+    description: A table. One row per file, transcript, mockup or document that supports this ticket. Number them SM1, SM2... Share files as `rlm-shared://path`. Write `None` in the first row if there is nothing.
+    value: |
+      | ID | Description | Location |
+      |---|---|---|
+      | SM1 |  |  |
+  validations:
+    required: true
+- type: textarea
+  id: origin
+  attributes:
+    label: Origin
+    description: 'One line: **Requested by** *person* **on** *date* **@** *circumstance*. Who asked for this, when, and where. On a slice, a second line: **Created for:** the blueprint artifact it boots from.'
+    placeholder: |-
+      Requested by JD on 09/08/2026-Tue @ the product meeting
+      Created for: rlm-shared://projects/<product>/blueprint/<feature>/<artifact>.md
+  validations:
+    required: true
+- type: textarea
+  id: related-tickets
+  attributes:
+    label: Related Tickets
+    description: A table. Every ticket this one relates to, as a full link, with the relationship in words (Parent, Origin ticket, Sibling, Blocks, Where Phase 3 lives...). Do not list children or Blocked By edges - the board shows those. Write `None` in the first row if there is nothing.
+    value: |
+      | Relationship | Ticket | Description |
+      |---|---|---|
+      |  |  |  |
+  validations:
+    required: true
