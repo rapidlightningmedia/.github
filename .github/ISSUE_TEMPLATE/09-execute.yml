@@ -1,7 +1,7 @@
 # Generated from the ruled ticket-template spec (rlm-ops#484). Edit the spec, then this file, in the same motion.
-name: Execute
+name: Execution
 description: 'A workable ticket: a slice or a plain build, an ops task. Ends when the acceptance criteria are met.'
-type: Execute
+type: Execution
 projects:
 - rapidlightningmedia/11
 body:

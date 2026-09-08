@@ -16,7 +16,7 @@ The ruled shape behind the forms is written once, on the RLM share: `rlm-shared:
 | Architecture | The system-design phase: the ADR. | Overview |
 | Design | The branded mockups, after Architecture. | Screens |
 | Blueprint | The code shape: file-tree diff, signatures, control flow. | Shape |
-| Execute | A workable ticket: a slice, a plain build, an ops task. | Mission |
+| Execution | A workable ticket: a slice, a plain build, an ops task. | Mission |
 | Bug | Something is wrong. | Symptom |
 | PR Ticket | The ticket a PR closes when one change lands in several repos. | Ruling |
 | Ops Umbrella | One of the seven standing shelves. Only on a ruling. | Purpose |

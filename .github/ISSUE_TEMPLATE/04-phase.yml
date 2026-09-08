@@ -1,6 +1,6 @@
 # Generated from the ruled ticket-template spec (rlm-ops#484). Edit the spec, then this file, in the same motion.
 name: Phase
-description: 'A group under a Goal. Gets only the ceremony children it needs (Plan tier: Blueprint + Execute; Full tier: all four).'
+description: 'A group under a Goal. Gets only the ceremony children it needs (Plan tier: Blueprint + Execution; Full tier: all four).'
 type: Phase
 projects:
 - rapidlightningmedia/11
