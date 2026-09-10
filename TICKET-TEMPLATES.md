@@ -21,7 +21,7 @@ The ruled shape behind the forms is written once, on the RLM share: `rlm-shared:
 | PR Ticket | The ticket a PR closes when one change lands in several repos. | Ruling |
 | Ops Umbrella | One of the seven standing shelves. Only on a ruling. | Purpose |
 
-A Quarter Bucket has no form. The board automation writes it when the first ticket under an ops umbrella is set Done in a quarter.
+A Quarter Bucket has no form. The board automation writes it when the first ticket under an ops umbrella is set Completed in a quarter (the Status was called Done until 09/09/2026-Wed, rlm-ops#542).
 
 ## How to write it
 
