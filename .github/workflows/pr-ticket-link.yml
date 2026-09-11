@@ -5,15 +5,19 @@ name: PR ticket link
 # famlybot, rlm-lib and client-portal each carried a full copy until rlm-ops#558; those copies
 # are how the old one-ticket rule outlived JD's ruling.
 #
-# The rule (JD, 09/10/2026-Thu): a PR attaches to every ticket it delivers. So a PR must close
+# The rule (JD, 09/10/2026-Thu): a PR attaches to every ticket it delivers. So a PR must link
 # ONE OR MORE tickets. Zero fails. More than one passes.
+#
+# A merge never closes a ticket: "Auto-close issues with merged linked pull requests" is off in
+# every ticket repo (JD, 09/11/2026-Fri, rlm-ops#586). The `Closes` keyword is kept only because
+# it is the link.
 #
 # It reads the RESOLVED closingIssuesReferences field from the API and never greps the PR body,
 # so it verifies that GitHub actually linked the ticket instead of trusting that the text looked
 # right. "Ticket: #25" is a mention, not a link, and a keyword inside backticks resolves to nothing.
 #
 # Cross-repo tickets (famlybot#82): the caller's GITHUB_TOKEN is repo-scoped and cannot see private
-# issues in another repo, so a PR that closes owner/repo#N elsewhere reads as zero under it. On a
+# issues in another repo, so a PR that links owner/repo#N elsewhere reads as zero under it. On a
 # zero, we mint an org-scoped token from the rlm-board-cascade GitHub App and resolve the SAME field
 # again. Same-repo PRs (the common case) never mint, so they carry no dependency on the App key.
 #
@@ -31,7 +35,8 @@ name: PR ticket link
 # repos. A red run does not block a merge; the /execute green gate and /review are what stop one.
 #
 # ADRs (rlm-shared): decisions/board/2026-07-21-pr-ticket-linking-closing-keyword.md (and its
-# 09/10/2026 amendment) and 2026-07-31-pr-ticket-check-cross-repo-visibility.md.
+# 09/10/2026 amendment), 2026-07-31-pr-ticket-check-cross-repo-visibility.md, and
+# 2026-09-11-merges-never-close-tickets.md.
 #
 # The caller - the whole of .github/workflows/pr-ticket-link.yml in each repo:
 #
@@ -53,18 +58,18 @@ name: PR ticket link
 #       secrets:
 #         BOARD_CASCADE_APP_PRIVATE_KEY: ${{ secrets.BOARD_CASCADE_APP_PRIVATE_KEY }}
 #
-# The check reports as "ticket-link / PR closes a ticket".
+# The check reports as "ticket-link / PR links a ticket".
 
 on:
   workflow_call:
     secrets:
       BOARD_CASCADE_APP_PRIVATE_KEY:
-        description: The rlm-board-cascade App private key. Needed only when a PR closes a ticket in another repo.
+        description: The rlm-board-cascade App private key. Needed only when a PR links a ticket in another repo.
         required: false
 
 jobs:
   ticket-link:
-    name: PR closes a ticket
+    name: PR links a ticket
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -74,7 +79,7 @@ jobs:
     # opt-out label, so the exemption cannot be borrowed by a human PR.
     if: github.event.pull_request.user.type != 'Bot'
     steps:
-      - name: Resolve visible closing references
+      - name: Resolve visible linked tickets
         id: resolve
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -100,14 +105,14 @@ jobs:
             # One or more is the rule. Tickets in other private repos are not listed here, because
             # this token cannot see them and the App token is only minted on a zero.
             {
-              echo "This PR closes $count ticket(s) in this repo:"
+              echo "This PR links $count ticket(s) in this repo:"
               printf '%s\n' "$tickets" | while read -r t; do echo "- $t"; done
             } | tee -a "$GITHUB_STEP_SUMMARY"
             echo "cross_repo=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
-          # Zero visible references: either the PR closes nothing, or it closes a ticket in a repo
+          # Zero visible references: either the PR links nothing, or it links a ticket in a repo
           # this token cannot see. The org-scoped steps below tell them apart.
           echo "cross_repo=true" >> "$GITHUB_OUTPUT"
 
@@ -122,7 +127,7 @@ jobs:
           # Fail closed, with a message that says which of the two cases this might be. A missing
           # secret, or a fork PR (the pull_request trigger withholds secrets from forks), lands here.
           if [ -z "$APP_KEY" ]; then
-            echo "::error::This PR closes no ticket that this repo can see. If it closes no ticket at all, put 'Closes #N' on the FIRST line of the PR description. If it closes a ticket in ANOTHER repo ('Closes owner/repo#N'), the check needs the BOARD_CASCADE_APP_PRIVATE_KEY secret to see that ticket, and $REPO does not have it. Set it on this repo (JD's hands), then re-run this check."
+            echo "::error::This PR links no ticket that this repo can see. If it links no ticket at all, put 'Closes #N' on the FIRST line of the PR description. If it links a ticket in ANOTHER repo ('Closes owner/repo#N'), the check needs the BOARD_CASCADE_APP_PRIVATE_KEY secret to see that ticket, and $REPO does not have it. Set it on this repo (JD's hands), then re-run this check."
             exit 1
           fi
 
@@ -144,7 +149,7 @@ jobs:
           permission-issues: read
           permission-pull-requests: read
 
-      - name: Resolve cross-repo closing references
+      - name: Resolve cross-repo linked tickets
         if: steps.resolve.outputs.cross_repo == 'true'
         env:
           GH_TOKEN: ${{ steps.mint.outputs.token }}
@@ -154,8 +159,8 @@ jobs:
           set -euo pipefail
 
           # The same resolved-reference query, now with a token that can see the other repo. An
-          # empty result here means GitHub resolved no closing link at all - a bare mention, or a
-          # typo'd or backtick-disabled reference - so the merge would close nothing.
+          # empty result here means GitHub resolved no link at all - a bare mention, or a typo'd
+          # or backtick-disabled reference - so the PR links nothing.
           tickets=$(gh pr view "$PR" --repo "$REPO" \
             --json closingIssuesReferences \
             --jq '.closingIssuesReferences[] | "\(.repository.owner.login)/\(.repository.name)#\(.number)"')
@@ -163,11 +168,11 @@ jobs:
           count=$(printf '%s' "$tickets" | grep -c . || true)
 
           if [ "$count" -eq 0 ]; then
-            echo "::error::This PR closes no ticket. Put 'Closes #N' on the FIRST line of the PR description, or 'Closes owner/repo#N' if the ticket lives in another repo. Add one line for each ticket the PR delivers. A line like 'Ticket: #N' is only a mention: it leaves the PR out of the ticket's Development panel, and the merge will not close the ticket."
+            echo "::error::This PR links no ticket. Put 'Closes #N' on the FIRST line of the PR description, or 'Closes owner/repo#N' if the ticket lives in another repo. Add one line for each ticket the PR delivers. The keyword makes the link; a merge does not close the ticket. A line like 'Ticket: #N' is only a mention and makes no link."
             exit 1
           fi
 
           {
-            echo "This PR closes $count ticket(s):"
+            echo "This PR links $count ticket(s):"
             printf '%s\n' "$tickets" | while read -r t; do echo "- $t"; done
           } | tee -a "$GITHUB_STEP_SUMMARY"
