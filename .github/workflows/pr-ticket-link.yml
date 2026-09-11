@@ -21,9 +21,11 @@ name: PR ticket link
 # public (GET /apps/rlm-board-cascade returns it with no login), so it lives here, and each repo
 # needs ONE secret: BOARD_CASCADE_APP_PRIVATE_KEY. (JD's ruling, 09/10/2026-Thu, rlm-ops#558: the
 # client id replaced the deprecated app-id input and the BOARD_CASCADE_APP_ID secret.) Callers pass
-# the key with `secrets: inherit`. The org is on GitHub Free, where private repos cannot read
-# org-level secrets, so the key is set per repo. A repo without it still passes same-repo PRs;
-# only a cross-repo close needs it.
+# ONLY the key, by name. Never `secrets: inherit`: it hands EVERY secret in the caller's repo (cloud
+# keys, package tokens) to this public workflow, which needs just the one (JD's ruling, rlm-ops#558).
+# The org is on GitHub Free, where private repos cannot read org-level secrets, so the key is set
+# per repo. A repo without it passes an empty value, still passes same-repo PRs, and fails a
+# cross-repo close with an error that names the secret.
 #
 # It cannot be a REQUIRED check: GitHub Free blocks branch protection and rulesets on private
 # repos. A red run does not block a merge; the /execute green gate and /review are what stop one.
@@ -47,7 +49,9 @@ name: PR ticket link
 #   jobs:
 #     ticket-link:
 #       uses: rapidlightningmedia/.github/.github/workflows/pr-ticket-link.yml@main
-#       secrets: inherit
+#       # Pass ONLY the App key, by name. Never `secrets: inherit`.
+#       secrets:
+#         BOARD_CASCADE_APP_PRIVATE_KEY: ${{ secrets.BOARD_CASCADE_APP_PRIVATE_KEY }}
 #
 # The check reports as "ticket-link / PR closes a ticket".
 
