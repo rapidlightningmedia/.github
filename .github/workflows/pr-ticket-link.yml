@@ -17,10 +17,13 @@ name: PR ticket link
 # zero, we mint an org-scoped token from the rlm-board-cascade GitHub App and resolve the SAME field
 # again. Same-repo PRs (the common case) never mint, so they carry no dependency on the App key.
 #
-# This repo is PUBLIC, so this file is public. It holds no secrets. Callers pass theirs with
-# `secrets: inherit`. The org is on GitHub Free, where private repos cannot read org-level
-# secrets, so BOARD_CASCADE_APP_ID and BOARD_CASCADE_APP_PRIVATE_KEY are set per repo. A repo
-# without them still passes same-repo PRs; only a cross-repo close needs them.
+# This repo is PUBLIC, so this file is public. It holds no secrets. The App's client id below is
+# public (GET /apps/rlm-board-cascade returns it with no login), so it lives here, and each repo
+# needs ONE secret: BOARD_CASCADE_APP_PRIVATE_KEY. (JD's ruling, 09/10/2026-Thu, rlm-ops#558: the
+# client id replaced the deprecated app-id input and the BOARD_CASCADE_APP_ID secret.) Callers pass
+# the key with `secrets: inherit`. The org is on GitHub Free, where private repos cannot read
+# org-level secrets, so the key is set per repo. A repo without it still passes same-repo PRs;
+# only a cross-repo close needs it.
 #
 # It cannot be a REQUIRED check: GitHub Free blocks branch protection and rulesets on private
 # repos. A red run does not block a merge; the /execute green gate and /review are what stop one.
@@ -51,9 +54,6 @@ name: PR ticket link
 on:
   workflow_call:
     secrets:
-      BOARD_CASCADE_APP_ID:
-        description: The rlm-board-cascade App id. Needed only when a PR closes a ticket in another repo.
-        required: false
       BOARD_CASCADE_APP_PRIVATE_KEY:
         description: The rlm-board-cascade App private key. Needed only when a PR closes a ticket in another repo.
         required: false
@@ -107,10 +107,9 @@ jobs:
           # this token cannot see. The org-scoped steps below tell them apart.
           echo "cross_repo=true" >> "$GITHUB_OUTPUT"
 
-      - name: Check the App secrets are set
+      - name: Check the App secret is set
         if: steps.resolve.outputs.cross_repo == 'true'
         env:
-          APP_ID: ${{ secrets.BOARD_CASCADE_APP_ID }}
           APP_KEY: ${{ secrets.BOARD_CASCADE_APP_PRIVATE_KEY }}
           REPO: ${{ github.repository }}
         run: |
@@ -118,8 +117,8 @@ jobs:
 
           # Fail closed, with a message that says which of the two cases this might be. A missing
           # secret, or a fork PR (the pull_request trigger withholds secrets from forks), lands here.
-          if [ -z "$APP_ID" ] || [ -z "$APP_KEY" ]; then
-            echo "::error::This PR closes no ticket that this repo can see. If it closes no ticket at all, put 'Closes #N' on the FIRST line of the PR description. If it closes a ticket in ANOTHER repo ('Closes owner/repo#N'), the check needs the BOARD_CASCADE_APP_ID and BOARD_CASCADE_APP_PRIVATE_KEY secrets to see that ticket, and $REPO does not have them. Set them on this repo (JD's hands), then re-run this check."
+          if [ -z "$APP_KEY" ]; then
+            echo "::error::This PR closes no ticket that this repo can see. If it closes no ticket at all, put 'Closes #N' on the FIRST line of the PR description. If it closes a ticket in ANOTHER repo ('Closes owner/repo#N'), the check needs the BOARD_CASCADE_APP_PRIVATE_KEY secret to see that ticket, and $REPO does not have it. Set it on this repo (JD's hands), then re-run this check."
             exit 1
           fi
 
@@ -128,7 +127,9 @@ jobs:
         if: steps.resolve.outputs.cross_repo == 'true'
         uses: actions/create-github-app-token@v3
         with:
-          app-id: ${{ secrets.BOARD_CASCADE_APP_ID }}
+          # The rlm-board-cascade App's client id. Public by design: `gh api /apps/rlm-board-cascade`
+          # returns it with no login. Only the private key is a secret.
+          client-id: Iv23liYQpQkGrus2Q6Yc
           private-key: ${{ secrets.BOARD_CASCADE_APP_PRIVATE_KEY }}
           # No `repositories:` -> the token can read every repo the App is installed on in this org,
           # so it sees both this PR and the ticket's repo. Resolving the closing reference needs the
