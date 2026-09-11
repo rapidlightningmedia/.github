@@ -135,6 +135,10 @@ jobs:
           # so it sees both this PR and the ticket's repo. Resolving the closing reference needs the
           # App's Pull requests:Read (the PR side) and Issues:Read (the ticket side).
           owner: ${{ github.repository_owner }}
+          # Least scope. The App also holds Issues:Write and Projects:Write for board-cascade; without
+          # these two lines the minted token would carry them too. The check only reads.
+          permission-issues: read
+          permission-pull-requests: read
 
       - name: Resolve cross-repo closing references
         if: steps.resolve.outputs.cross_repo == 'true'
