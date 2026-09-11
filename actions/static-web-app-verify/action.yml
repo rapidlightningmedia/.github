@@ -1,0 +1,103 @@
+name: Verify a Static Web App deploy
+description: Wait until an Azure Static Web App serves THIS build, then check the root, the caching headers and the navigation fallback. Fails red if the build never arrives.
+
+# The shared Static Web App deploy check (rlm-ops#559). Every repo that deploys a site to Azure
+# Static Web Apps calls this action after its upload, so the check lives in ONE place and the next
+# fix is one edit. Until rlm-ops#559 each repo carried its own copy, and the copies had drifted
+# into three different shapes.
+#
+# Why it waits: Azure answers 200 for every path, because the navigation fallback serves the app
+# for any route. A missing hashed asset comes back as 200, text/html, WITH the immutable header
+# (the route rule matches the path, not the file). So "the root loads" and "the asset is immutable"
+# were both true of the site that was live BEFORE the deploy. On 09/10/2026 the fmft verify ran all
+# four of its checks in one second against the old splash page and went green.
+#
+# So this action first waits until the live site serves the build id that
+# static-web-app-stamp wrote before the upload. Only then does it check anything else:
+#
+#   1. The live site serves this build (_deploy/build-id.txt equals the commit SHA).
+#      Polls every 10 seconds, up to wait-seconds, then fails red.
+#   2. The live root is byte for byte the built index.html.
+#   3. The root is no-cache.
+#   4. A hashed asset from the built index.html comes back as CSS or JavaScript (never the
+#      text/html fallback) with a 200 and the immutable header.
+#   5. An unknown path falls back to the app: 200, text/html.
+#
+# The script is verify.sh, next to this file. It runs by hand too:
+#
+#   HOST=<app>.azurestaticapps.net BUILD_DIR=build BUILD_ID=<commit sha> bash verify.sh
+#
+# This repo is PUBLIC, so this file is public. It holds no secrets and needs none. It reads the
+# host through the caller's Azure login, which the deploy job already has.
+#
+# The caller steps, in the deploy job, after `azure/login` (the stamp goes before the upload):
+#
+#   - name: Verify the deployed site
+#     id: verify
+#     uses: rapidlightningmedia/.github/actions/static-web-app-verify@main
+#     with:
+#       app-name: ${{ vars.WEB_APP_NAME }}
+#       resource-group: ${{ vars.AZURE_RESOURCE_GROUP }}
+#       build-dir: build
+#       # optional: a client-side route this app must serve, e.g. a magic-link path
+#       # fallback-path: /auth/redeem/deep-link-that-only-exists-client-side
+#
+# A repo-only check (famlybot's API CORS) runs as its own step after this one and reads the host
+# from `steps.verify.outputs.host`.
+
+inputs:
+  app-name:
+    description: The Static Web App's name (the WEB_APP_NAME repo variable).
+    required: true
+  resource-group:
+    description: The Static Web App's resource group (the AZURE_RESOURCE_GROUP repo variable).
+    required: true
+  build-dir:
+    description: The folder the deploy step uploaded. The stamp action must have run on it.
+    required: true
+  fallback-path:
+    description: A path that is not a file, which the navigation fallback must answer with the app.
+    required: false
+    default: /definitely-not-a-real-route
+  wait-seconds:
+    description: How long to wait for this build to go live before failing red.
+    required: false
+    default: '300'
+
+outputs:
+  host:
+    description: The Static Web App's default hostname, for any repo-only check that runs after.
+    value: ${{ steps.host.outputs.host }}
+
+runs:
+  using: composite
+  steps:
+    - name: Find the Static Web App host
+      id: host
+      shell: bash
+      env:
+        APP_NAME: ${{ inputs.app-name }}
+        RESOURCE_GROUP: ${{ inputs.resource-group }}
+      run: |
+        set -euo pipefail
+
+        HOST=$(az staticwebapp show \
+          --name "$APP_NAME" \
+          --resource-group "$RESOURCE_GROUP" \
+          --query "defaultHostname" -o tsv)
+        if [ -z "$HOST" ]; then
+          echo "::error::could not read the default hostname of Static Web App '$APP_NAME' in '$RESOURCE_GROUP'. Run this after azure/login, in the job that deployed."
+          exit 1
+        fi
+        echo "Deployed host: https://$HOST"
+        echo "host=$HOST" >> "$GITHUB_OUTPUT"
+
+    - name: Verify the live site serves this build
+      shell: bash
+      env:
+        HOST: ${{ steps.host.outputs.host }}
+        BUILD_DIR: ${{ inputs.build-dir }}
+        BUILD_ID: ${{ github.sha }}
+        FALLBACK_PATH: ${{ inputs.fallback-path }}
+        WAIT_SECONDS: ${{ inputs.wait-seconds }}
+      run: bash "$GITHUB_ACTION_PATH/verify.sh"
