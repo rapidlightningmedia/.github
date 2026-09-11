@@ -1,0 +1,44 @@
+name: Stamp a Static Web App build
+description: Write this commit's SHA into the build folder as _deploy/build-id.txt, so the verify action can tell this build from the one already live.
+
+# The first half of the shared Static Web App deploy check (rlm-ops#559). Run it AFTER the build
+# and BEFORE the upload. The second half, static-web-app-verify, runs after the upload and waits
+# until the live site serves the file this step writes.
+#
+# The file holds the commit SHA and nothing else. It collects nothing and tracks nobody. The page
+# HTML is not touched, so a parked page keeps its one `rlm-parked` tag (JD's ruling, rlm-ops#559
+# call C1 A, 09/11/2026-Fri).
+#
+# The caller step, in the deploy job, between the build and the upload:
+#
+#   - name: Stamp the build with this commit
+#     uses: rapidlightningmedia/.github/actions/static-web-app-stamp@main
+#     with:
+#       build-dir: build
+
+inputs:
+  build-dir:
+    description: The folder the deploy step uploads. It must already hold the built index.html.
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Write _deploy/build-id.txt
+      shell: bash
+      env:
+        BUILD_DIR: ${{ inputs.build-dir }}
+        BUILD_ID: ${{ github.sha }}
+      run: |
+        set -euo pipefail
+
+        # A missing index.html means the stamp ran before the build, or the caller named the
+        # wrong folder. Either way the verify would wait for a file that never uploads.
+        if [ ! -f "$BUILD_DIR/index.html" ]; then
+          echo "::error::$BUILD_DIR/index.html does not exist. Run the stamp after the build, and pass the folder the deploy step uploads."
+          exit 1
+        fi
+
+        mkdir -p "$BUILD_DIR/_deploy"
+        printf '%s\n' "$BUILD_ID" > "$BUILD_DIR/_deploy/build-id.txt"
+        echo "Stamped build $BUILD_ID into $BUILD_DIR/_deploy/build-id.txt"
