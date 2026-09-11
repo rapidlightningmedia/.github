@@ -1,0 +1,446 @@
+name: Main red alert
+
+# The shared main red alert (famlybot#138). A product repo's CI calls this file as its last job,
+# and it keeps ONE board ticket honest about whether the default branch is red.
+#
+# Why it exists: on 2026-08-12 a new package advisory turned every famlybot branch red with no
+# commit, and nothing said so for two days. CI only ran when someone pushed, and a red run only
+# showed in the Actions tab. GitHub's own failure email for a scheduled run goes to "the user who
+# last modified the cron syntax" - the machine account, not JD. So the alert is a board ticket,
+# where JD already works (JD's rulings on famlybot#138: C1 A a labeled board ticket, C3 B one
+# shared workflow here that each repo calls). It is the one exception to the support@ alert rule:
+# a red build is work to pick up, not an outage.
+#
+# What it does, per run:
+#   red,   no alert ticket open   -> open one: type Bug, label ci-main-red, assigned to JD, parented
+#                                    under the repo's ops umbrella, on the board at Up Next / Tech /
+#                                    Coding. The body is on the Bug template, so the lint passes.
+#   red,   alert ticket open      -> one comment: "still red" or "red again", with the failed jobs.
+#   green, alert ticket open      -> one "green again" comment, only if its last word was red.
+#   green, nothing open           -> nothing.
+# It NEVER closes the ticket. Completed is a human's write (rlm-ops#487).
+#
+# Writes happen on the default branch ONLY. On any other ref - a pull request, a dispatch on a
+# feature branch - it forces a dry run: every read still happens (the App token, the board ids,
+# the parent, the open ticket), so each PR proves the alert path still works, and nothing is
+# written. A caller can also ask for a dry run on the default branch with `dry-run: true`.
+#
+# Tokens: the board and issue writes use a token minted from the rlm-board-cascade App (Issues
+# write + org Projects write, nothing else), because the run's GITHUB_TOKEN cannot write an org
+# project or parent a ticket in another repo. The list of this run's failed jobs uses the run's
+# own token, because the App has no Actions permission - so the calling job must grant
+# `actions: read`.
+#
+# This repo is PUBLIC, so this file is public. It holds no secrets; the App's client id is public.
+# Callers pass ONLY the App key, by name. Never `secrets: inherit` (rlm-ops#558).
+#
+# The caller - the last job in the repo's CI workflow (famlybot's .github/workflows/ci.yml):
+#
+#   alert:
+#     name: alert
+#     needs: [every, other, job]
+#     if: ${{ !cancelled() && github.event.pull_request.user.type != 'Bot' }}
+#     permissions:
+#       contents: read
+#       actions: read
+#     uses: rapidlightningmedia/.github/.github/workflows/main-red-alert.yml@main
+#     with:
+#       result: ${{ (contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')) && 'failure' || 'success' }}
+#       parent: rapidlightningmedia/rlm-ops#414
+#     secrets:
+#       BOARD_CASCADE_APP_PRIVATE_KEY: ${{ secrets.BOARD_CASCADE_APP_PRIVATE_KEY }}
+#
+# `!cancelled()` and not `always()`: a run cancelled by a newer push says nothing, because the
+# newer run reports. The Bot guard: Dependabot PRs get no secrets, so they skip instead of failing.
+
+on:
+  workflow_call:
+    inputs:
+      result:
+        description: "The caller's verdict on the run: 'failure' or 'success'."
+        required: true
+        type: string
+      parent:
+        description: "The ops umbrella the alert ticket is parented under, as owner/repo#N."
+        required: true
+        type: string
+      assignee:
+        description: "Who the alert ticket is assigned to."
+        required: false
+        type: string
+        default: JDRapid
+      label:
+        description: "The label that marks the one alert ticket."
+        required: false
+        type: string
+        default: ci-main-red
+      project-number:
+        description: "The org project the alert ticket is placed on."
+        required: false
+        type: number
+        default: 11
+      dry-run:
+        description: "Read everything, write nothing. Forced on any ref that is not the default branch."
+        required: false
+        type: boolean
+        default: false
+    secrets:
+      BOARD_CASCADE_APP_PRIVATE_KEY:
+        description: The rlm-board-cascade App private key. Every alert write uses it.
+        required: true
+
+jobs:
+  alert:
+    name: main red alert
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      actions: read  # list this run's failed jobs with the run's own token
+    # One alert at a time per repo and ref, so a nightly run and a push run that both fail on
+    # main cannot race to open two tickets. Never cancel: a pending alert must still land.
+    concurrency:
+      group: main-red-alert-${{ github.repository }}-${{ github.ref }}
+      cancel-in-progress: false
+    steps:
+      - name: Check the App secret is set
+        env:
+          APP_KEY: ${{ secrets.BOARD_CASCADE_APP_PRIVATE_KEY }}
+          REPO: ${{ github.repository }}
+        run: |
+          if [ -z "$APP_KEY" ]; then
+            echo "::error::The main red alert needs the BOARD_CASCADE_APP_PRIVATE_KEY secret, and $REPO does not pass one. Set it on the repo (JD's hands) and pass it by name from the caller."
+            exit 1
+          fi
+
+      - name: Mint the board token
+        id: mint
+        uses: actions/create-github-app-token@v3
+        with:
+          # The rlm-board-cascade App's client id. Public by design: `gh api /apps/rlm-board-cascade`
+          # returns it with no login. Only the private key is a secret.
+          client-id: Iv23liYQpQkGrus2Q6Yc
+          private-key: ${{ secrets.BOARD_CASCADE_APP_PRIVATE_KEY }}
+          # No `repositories:` -> the token reaches every repo the App is installed on in this org,
+          # which the parent in another repo (the ops umbrellas live in rlm-ops) needs.
+          owner: ${{ github.repository_owner }}
+          # Least scope: the two permissions the alert writes with, and nothing else.
+          permission-issues: write
+          permission-organization-projects: write
+
+      - name: Open, update, or quiet the alert ticket
+        env:
+          GH_TOKEN: ${{ steps.mint.outputs.token }}
+          RUN_TOKEN: ${{ github.token }}
+          RESULT: ${{ inputs.result }}
+          PARENT: ${{ inputs.parent }}
+          ASSIGNEE: ${{ inputs.assignee }}
+          LABEL: ${{ inputs.label }}
+          PROJECT_NUMBER: ${{ inputs.project-number }}
+          DRY_RUN: ${{ inputs.dry-run }}
+          TITLE: Get CI on main green again
+          # Where a new alert ticket lands on the board. A red main is genuinely next, so Up Next;
+          # Tech because only the CTO hat needs it; Coding because it ends in a PR (the Bug rules).
+          BOARD_STATUS: Up Next
+          BOARD_TRACK: Tech
+          BOARD_CATEGORY: Coding
+        run: |
+          set -euo pipefail
+
+          # ---- Inputs --------------------------------------------------------------------------------
+
+          case "$RESULT" in
+            failure|success) ;;
+            *) echo "::error::The result input must be 'failure' or 'success'. It was '$RESULT'."; exit 1 ;;
+          esac
+
+          if [[ ! "$PARENT" =~ ^([A-Za-z0-9_.-]+)/([A-Za-z0-9_.-]+)#([0-9]+)$ ]]; then
+            echo "::error::The parent input must look like owner/repo#N. It was '$PARENT'."
+            exit 1
+          fi
+          parent_owner="${BASH_REMATCH[1]}"
+          parent_repo="${BASH_REMATCH[2]}"
+          parent_num="${BASH_REMATCH[3]}"
+
+          repo="$GITHUB_REPOSITORY"
+          org="${repo%%/*}"
+          run_url="$GITHUB_SERVER_URL/$repo/actions/runs/$GITHUB_RUN_ID"
+          commit_url="$GITHUB_SERVER_URL/$repo/commit/$GITHUB_SHA"
+          short_sha="${GITHUB_SHA:0:7}"
+          when="$(TZ=America/Chicago date '+%m/%d/%Y-%a %-I:%M %p %Z')"
+          today="$(TZ=America/Chicago date '+%m/%d/%Y-%a')"
+          work="$(mktemp -d)"
+
+          # ---- Writes happen on the default branch only ---------------------------------------------
+          #
+          # Anywhere else (a pull request, a dispatch on a feature branch) this is a dry run, whatever the
+          # caller passed. A dry run still makes every read - the token, the board ids, the parent, the open
+          # ticket - so it proves the alert path works without touching the board.
+
+          default_branch="$(gh api "repos/$repo" --jq .default_branch)"
+          if [ "$GITHUB_REF" != "refs/heads/$default_branch" ]; then
+            if [ "$DRY_RUN" != "true" ]; then
+              echo "This run is on $GITHUB_REF, not $default_branch. Forcing a dry run."
+            fi
+            DRY_RUN=true
+          fi
+          if [ "$DRY_RUN" = "true" ]; then
+            echo "DRY RUN: every read happens, no write does."
+          fi
+
+          # ---- Reads ---------------------------------------------------------------------------------
+
+          case "$GITHUB_EVENT_NAME" in
+            schedule)          trigger="the nightly schedule" ;;
+            push)              trigger="a push to \`$default_branch\`" ;;
+            workflow_dispatch) trigger="a manual run" ;;
+            *)                 trigger="a \`$GITHUB_EVENT_NAME\` event" ;;
+          esac
+
+          # This run's failed jobs. The run's own token reads them: the board App has no Actions permission.
+          failed_jobs="$(GH_TOKEN="$RUN_TOKEN" gh api --paginate "repos/$repo/actions/runs/$GITHUB_RUN_ID/jobs?per_page=100" \
+            --jq '.jobs[] | select(.conclusion == "failure" or .conclusion == "cancelled" or .conclusion == "timed_out") | "- [\(.name)](\(.html_url)) - \(.conclusion)"')"
+          if [ -z "$failed_jobs" ]; then
+            failed_jobs="- No failed job is listed yet. Open the run."
+          fi
+
+          # The one open alert ticket, if there is one. The oldest wins if a race ever made two.
+          open_num="$(gh issue list --repo "$repo" --label "$LABEL" --state open --limit 100 --json number \
+            --jq 'sort_by(.number) | .[0].number // empty')"
+
+          # What the alert said last on that ticket: red or green. The ticket body counts as red.
+          last_state() {
+            local said
+            said="$(gh api --paginate "repos/$repo/issues/$1/comments?per_page=100" --jq '.[].body' \
+              | grep -oE 'main-red-alert:(red|green)' | tail -1 | cut -d: -f2 || true)"
+            echo "${said:-red}"
+          }
+
+          post_comment() {
+            if [ "$DRY_RUN" = "true" ]; then
+              echo "DRY RUN: would comment on #$1:"
+              cat "$2"
+            else
+              gh issue comment "$1" --repo "$repo" --body-file "$2"
+            fi
+          }
+
+          # ---- Green ---------------------------------------------------------------------------------
+
+          if [ "$RESULT" = "success" ]; then
+            if [ -z "$open_num" ]; then
+              echo "CI is green and no alert ticket is open. Nothing to do."
+              exit 0
+            fi
+            if [ "$(last_state "$open_num")" = "green" ]; then
+              echo "CI is green, and #$open_num already says so. Nothing to do."
+              exit 0
+            fi
+            cat > "$work/green.md" <<EOF
+          CI on \`$default_branch\` is green again.
+
+          The run: $run_url ($trigger, commit [\`$short_sha\`]($commit_url), $when).
+
+          This ticket stays open. A human closes it once a comment names the cause.
+
+          <!-- main-red-alert:green -->
+          EOF
+            post_comment "$open_num" "$work/green.md"
+            exit 0
+          fi
+
+          # ---- Red, and a ticket is already open ----------------------------------------------------
+
+          if [ -n "$open_num" ]; then
+            if [ "$(last_state "$open_num")" = "green" ]; then
+              headline="CI on \`$default_branch\` is red again."
+            else
+              headline="CI on \`$default_branch\` is still red."
+            fi
+            cat > "$work/red.md" <<EOF
+          $headline
+
+          The run: $run_url ($trigger, commit [\`$short_sha\`]($commit_url), $when).
+
+          Failed jobs:
+
+          $failed_jobs
+
+          <!-- main-red-alert:red -->
+          EOF
+            post_comment "$open_num" "$work/red.md"
+            exit 0
+          fi
+
+          # ---- Red, and no ticket is open: open one and place it ------------------------------------
+          #
+          # Every id is resolved before the first write, so a renamed field or option is named in the log.
+          # The ticket still opens when placement cannot finish: the ticket IS the alert. The job then
+          # fails, so the gap is visible too.
+
+          problems=()
+
+          parent_title="$(gh api "repos/$parent_owner/$parent_repo/issues/$parent_num" --jq .title 2>/dev/null || true)"
+          if [ -z "$parent_title" ]; then
+            problems+=("The parent $PARENT cannot be read with the board token.")
+          fi
+
+          project_json="$(gh api graphql \
+            -f query='query($org: String!, $num: Int!) { organization(login: $org) { projectV2(number: $num) { id fields(first: 50) { nodes { ... on ProjectV2SingleSelectField { id name options { id name } } } } } } }' \
+            -f org="$org" -F num="$PROJECT_NUMBER")"
+          project_id="$(jq -r '.data.organization.projectV2.id // empty' <<<"$project_json")"
+          if [ -z "$project_id" ]; then
+            problems+=("Project #$PROJECT_NUMBER in $org cannot be read with the board token.")
+          fi
+
+          # field|option pairs to set on the new board item.
+          placements=("Status|$BOARD_STATUS" "Track|$BOARD_TRACK" "Category|$BOARD_CATEGORY")
+          resolved=()
+          for pair in "${placements[@]}"; do
+            field="${pair%%|*}"
+            option="${pair#*|}"
+            ids="$(jq -r --arg f "$field" --arg o "$option" \
+              '.data.organization.projectV2.fields.nodes[]? | select(.name == $f) | .id as $fid | .options[] | select(.name == $o) | "\($fid)|\(.id)"' \
+              <<<"$project_json")"
+            if [ -z "$ids" ]; then
+              problems+=("Project #$PROJECT_NUMBER has no '$field' field with a '$option' option.")
+            else
+              resolved+=("$field|$option|$ids")
+            fi
+          done
+
+          case "$GITHUB_EVENT_NAME" in
+            schedule) impact_cause="No commit started this run. So the cause is likely outside the code: a new package advisory, a yanked package, an expired credential, or a runner image change." ;;
+            *)        impact_cause="Start with the commit above. If it does not explain the failure, look outside the code: a new package advisory, a yanked package, an expired credential, or a runner image change." ;;
+          esac
+
+          cat > "$work/ticket.md" <<EOF
+          ## Symptom
+
+          CI on \`$default_branch\` failed on $when.
+
+          The run started from $trigger.
+
+          Failed jobs:
+
+          $failed_jobs
+
+          ## Expected
+
+          CI on \`$default_branch\` is green.
+
+          ## Steps to Reproduce
+
+          | # | Step |
+          |---|---|
+          | S1 | Open the failed run: $run_url |
+          | S2 | Read the log of each failed job listed under Symptom. |
+          | S3 | Re-run the failed jobs. A failure that clears on a re-run is flaky, not fixed. Say so in a comment. |
+
+          ## Where
+
+          | Fact | Value |
+          |---|---|
+          | Repo | \`$repo\` |
+          | Branch | \`$default_branch\` |
+          | Commit | [\`$short_sha\`]($commit_url) |
+          | Workflow | \`$GITHUB_WORKFLOW\` |
+          | Trigger | \`$GITHUB_EVENT_NAME\` |
+          | First seen | $when |
+          | How found | The main red alert (the shared workflow in \`rapidlightningmedia/.github\`) |
+
+          ## Impact
+
+          Every branch cut from \`$default_branch\` now starts red. A PR opened now fails for a reason its author did not cause.
+
+          $impact_cause
+
+          ## Fix
+
+          Not known yet. Whoever picks this up names the cause in a comment, then fixes it.
+
+          While \`$default_branch\` stays red, each red run adds a comment here. The first green run adds a "green again" comment. The alert never closes this ticket. A human does.
+
+          ## Acceptance Criteria
+
+          | # | Criterion |
+          |---|---|
+          | AC1 | CI on \`$default_branch\` is green again. |
+          | AC2 | A comment on this ticket names the cause. |
+
+          ## Supporting Material
+
+          | ID | Description | Location |
+          |---|---|---|
+          | SM1 | The failed run | $run_url |
+          | SM2 | The alert workflow | \`rapidlightningmedia/.github/.github/workflows/main-red-alert.yml\` |
+
+          ## Origin
+
+          Requested by the main red alert on $today @ a red run of \`$GITHUB_WORKFLOW\` on \`$default_branch\`, started from $trigger
+
+          ## Related Tickets
+
+          | Relationship | Ticket | Description |
+          |---|---|---|
+          | Parent | [$PARENT](https://github.com/$parent_owner/$parent_repo/issues/$parent_num) | ${parent_title:-The ops umbrella for this repo} |
+          | Where the alert was built | [famlybot#138](https://github.com/rapidlightningmedia/famlybot/issues/138) | Run CI on a schedule so a broken main gets noticed |
+
+          <!-- main-red-alert:red -->
+          EOF
+
+          if [ "$DRY_RUN" = "true" ]; then
+            echo "DRY RUN: would open '$TITLE' in $repo (type Bug, label $LABEL, assignee $ASSIGNEE)."
+            echo "DRY RUN: would parent it under $PARENT (${parent_title:-unreadable})."
+            for r in ${resolved[@]+"${resolved[@]}"}; do
+              echo "DRY RUN: would set board field ${r%%|*} = $(cut -d'|' -f2 <<<"$r")."
+            done
+            echo "---- ticket body ----"
+            cat "$work/ticket.md"
+            echo "---------------------"
+          else
+            gh label create "$LABEL" --repo "$repo" --color B60205 \
+              --description "CI on the default branch is red (the main red alert)" --force >/dev/null
+
+            created="$(gh api -X POST "repos/$repo/issues" \
+              -f title="$TITLE" -f type=Bug -F body=@"$work/ticket.md" \
+              -f "labels[]=$LABEL" -f "assignees[]=$ASSIGNEE")"
+            issue_num="$(jq -r .number <<<"$created")"
+            issue_id="$(jq -r .id <<<"$created")"
+            issue_node="$(jq -r .node_id <<<"$created")"
+            echo "Opened #$issue_num: $(jq -r .html_url <<<"$created")"
+
+            if [ -n "$parent_title" ]; then
+              gh api -X POST "repos/$parent_owner/$parent_repo/issues/$parent_num/sub_issues" \
+                -F sub_issue_id="$issue_id" >/dev/null \
+                && echo "Parented under $PARENT." \
+                || problems+=("Could not parent #$issue_num under $PARENT.")
+            fi
+
+            if [ -n "$project_id" ]; then
+              item_id="$(gh api graphql \
+                -f query='mutation($p: ID!, $c: ID!) { addProjectV2ItemById(input: { projectId: $p, contentId: $c }) { item { id } } }' \
+                -f p="$project_id" -f c="$issue_node" --jq '.data.addProjectV2ItemById.item.id' || true)"
+              if [ -z "$item_id" ]; then
+                problems+=("Could not add #$issue_num to project #$PROJECT_NUMBER.")
+              else
+                for r in ${resolved[@]+"${resolved[@]}"}; do
+                  field="${r%%|*}"
+                  option="$(cut -d'|' -f2 <<<"$r")"
+                  field_id="$(cut -d'|' -f3 <<<"$r")"
+                  option_id="$(cut -d'|' -f4 <<<"$r")"
+                  gh api graphql \
+                    -f query='mutation($p: ID!, $i: ID!, $f: ID!, $o: String!) { updateProjectV2ItemFieldValue(input: { projectId: $p, itemId: $i, fieldId: $f, value: { singleSelectOptionId: $o } }) { projectV2Item { id } } }' \
+                    -f p="$project_id" -f i="$item_id" -f f="$field_id" -f o="$option_id" >/dev/null \
+                    && echo "Set $field = $option." \
+                    || problems+=("Could not set $field = $option on #$issue_num.")
+                done
+              fi
+            fi
+          fi
+
+          if [ "${#problems[@]}" -gt 0 ]; then
+            for p in "${problems[@]}"; do
+              echo "::error::$p"
+            done
+            exit 1
+          fi
