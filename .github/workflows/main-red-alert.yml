@@ -52,6 +52,18 @@ name: Main red alert
 #
 # `!cancelled()` and not `always()`: a run cancelled by a newer push says nothing, because the
 # newer run reports. The Bot guard: Dependabot PRs get no secrets, so they skip instead of failing.
+#
+# Not only CI (rlm-ops#594). A scheduled check that watches something else - the policy-keeper
+# daily error check in rlm-ops - calls this same file with four optional inputs, so it keeps the
+# one-ticket, comment-while-red, green-again shape without copying it:
+#
+#   title        the new ticket's title.                  Blank -> "Get CI on main green again".
+#   subject      what is red, in the comments.            Blank -> "CI on `main`".
+#   ticket-body  the whole new ticket body (Bug template). Blank -> the CI body below.
+#   details      the "what failed" block in red comments. Blank -> this run's failed jobs.
+#
+# Such a caller passes its own `label` too, so its ticket is never mistaken for a red-CI ticket.
+# Every input left blank keeps today's CI wording exactly.
 
 on:
   workflow_call:
@@ -84,6 +96,26 @@ on:
         required: false
         type: boolean
         default: false
+      title:
+        description: "The new alert ticket's title. Blank keeps the CI title."
+        required: false
+        type: string
+        default: ""
+      subject:
+        description: "What is red, as the comments name it (\"<subject> is still red.\"). Blank means CI on the default branch."
+        required: false
+        type: string
+        default: ""
+      ticket-body:
+        description: "The whole body of a new alert ticket, on the Bug template. Blank keeps the CI body."
+        required: false
+        type: string
+        default: ""
+      details:
+        description: "The markdown that says what failed, in each red comment. Blank lists this run's failed jobs."
+        required: false
+        type: string
+        default: ""
     secrets:
       BOARD_CASCADE_APP_PRIVATE_KEY:
         description: The rlm-board-cascade App private key. Every alert write uses it.
@@ -137,7 +169,10 @@ jobs:
           LABEL: ${{ inputs.label }}
           PROJECT_NUMBER: ${{ inputs.project-number }}
           DRY_RUN: ${{ inputs.dry-run }}
-          TITLE: Get CI on main green again
+          TITLE_INPUT: ${{ inputs.title }}
+          SUBJECT_INPUT: ${{ inputs.subject }}
+          BODY_INPUT: ${{ inputs.ticket-body }}
+          DETAILS_INPUT: ${{ inputs.details }}
           # Where a new alert ticket lands on the board. A red main is genuinely next, so Up Next;
           # Tech because only the CTO hat needs it; Coding because it ends in a PR (the Bug rules).
           BOARD_STATUS: Up Next
@@ -169,6 +204,7 @@ jobs:
           when="$(TZ=America/Chicago date '+%m/%d/%Y-%a %-I:%M %p %Z')"
           today="$(TZ=America/Chicago date '+%m/%d/%Y-%a')"
           work="$(mktemp -d)"
+          TITLE="${TITLE_INPUT:-Get CI on main green again}"
 
           # ---- Writes happen on the default branch only ---------------------------------------------
           #
@@ -187,6 +223,8 @@ jobs:
             echo "DRY RUN: every read happens, no write does."
           fi
 
+          subject="${SUBJECT_INPUT:-CI on \`$default_branch\`}"
+
           # ---- Reads ---------------------------------------------------------------------------------
 
           case "$GITHUB_EVENT_NAME" in
@@ -201,6 +239,13 @@ jobs:
             --jq '.jobs[] | select(.conclusion == "failure" or .conclusion == "cancelled" or .conclusion == "timed_out") | "- [\(.name)](\(.html_url)) - \(.conclusion)"')"
           if [ -z "$failed_jobs" ]; then
             failed_jobs="- No failed job is listed yet. Open the run."
+          fi
+          if [ -n "$DETAILS_INPUT" ]; then
+            what_failed="$DETAILS_INPUT"
+          else
+            what_failed="Failed jobs:
+
+          $failed_jobs"
           fi
 
           # The one open alert ticket, if there is one. The oldest wins if a race ever made two.
@@ -228,15 +273,15 @@ jobs:
 
           if [ "$RESULT" = "success" ]; then
             if [ -z "$open_num" ]; then
-              echo "CI is green and no alert ticket is open. Nothing to do."
+              echo "Green, and no alert ticket is open. Nothing to do."
               exit 0
             fi
             if [ "$(last_state "$open_num")" = "green" ]; then
-              echo "CI is green, and #$open_num already says so. Nothing to do."
+              echo "Green, and #$open_num already says so. Nothing to do."
               exit 0
             fi
             cat > "$work/green.md" <<EOF
-          CI on \`$default_branch\` is green again.
+          $subject is green again.
 
           The run: $run_url ($trigger, commit [\`$short_sha\`]($commit_url), $when).
 
@@ -252,18 +297,16 @@ jobs:
 
           if [ -n "$open_num" ]; then
             if [ "$(last_state "$open_num")" = "green" ]; then
-              headline="CI on \`$default_branch\` is red again."
+              headline="$subject is red again."
             else
-              headline="CI on \`$default_branch\` is still red."
+              headline="$subject is still red."
             fi
             cat > "$work/red.md" <<EOF
           $headline
 
           The run: $run_url ($trigger, commit [\`$short_sha\`]($commit_url), $when).
 
-          Failed jobs:
-
-          $failed_jobs
+          $what_failed
 
           <!-- main-red-alert:red -->
           EOF
@@ -387,6 +430,15 @@ jobs:
 
           <!-- main-red-alert:red -->
           EOF
+
+          # A caller that watches something other than CI brings its own body. The red marker is added
+          # when the body lacks it, so the green-again logic reads the new ticket the same way.
+          if [ -n "$BODY_INPUT" ]; then
+            printf '%s\n' "$BODY_INPUT" > "$work/ticket.md"
+            if ! grep -q 'main-red-alert:red' "$work/ticket.md"; then
+              printf '\n<!-- main-red-alert:red -->\n' >> "$work/ticket.md"
+            fi
+          fi
 
           if [ "$DRY_RUN" = "true" ]; then
             echo "DRY RUN: would open '$TITLE' in $repo (type Bug, label $LABEL, assignee $ASSIGNEE)."
