@@ -18,6 +18,7 @@ The ruled shape behind the forms is written once, on the RLM share: `rlm-shared:
 | Blueprint | The code shape: file-tree diff, signatures, control flow. | Shape |
 | Task | A workable ticket: a slice, a plain build, an ops task. Named Execution until 09/09/2026-Wed. | Mission |
 | Bug | Something is wrong. | Symptom |
+| Alert | Something went wrong and a person should look. A machine opens it; a person may turn it into a Bug. | Alert |
 | PR Ticket | The ticket a PR closes when one change lands in several repos. | Ruling |
 | Ops Umbrella | One of the seven standing shelves. Only on a ruling. | Purpose |
 
