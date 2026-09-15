@@ -12,13 +12,16 @@ name: Main red alert
 # a red build is work to pick up, not an outage.
 #
 # What it does, per run:
-#   red,   no alert ticket open   -> open one: type Bug, label ci-main-red, assigned to JD, parented
+#   red,   no alert ticket open   -> open one: type Alert, label ci-main-red, assigned to JD, parented
 #                                    under the repo's ops umbrella, on the board at Up Next / Tech /
-#                                    Coding. The body is on the Bug template, so the lint passes.
+#                                    Coding. The body is on the Alert template, so the lint passes.
 #   red,   alert ticket open      -> one comment: "still red" or "red again", with the failed jobs.
 #   green, alert ticket open      -> one "green again" comment, only if its last word was red.
 #   green, nothing open           -> nothing.
 # It NEVER closes the ticket. Completed is a human's write (rlm-ops#487).
+#
+# An Alert says something went wrong and a person should look; a person may turn it into a Bug
+# (rlm-ops#595).
 #
 # Writes happen on the default branch ONLY. On any other ref - a pull request, a dispatch on a
 # feature branch - it forces a dry run: every read still happens (the App token, the board ids,
@@ -59,7 +62,7 @@ name: Main red alert
 #
 #   title        the new ticket's title.                  Blank -> "Get CI on main green again".
 #   subject      what is red, in the comments.            Blank -> "CI on `main`".
-#   ticket-body  the whole new ticket body (Bug template). Blank -> the CI body below.
+#   ticket-body  the whole new ticket body (Alert template). Blank -> the CI body below.
 #   details      the "what failed" block in red comments. Blank -> this run's failed jobs.
 #
 # Such a caller passes its own `label` too, so its ticket is never mistaken for a red-CI ticket.
@@ -107,7 +110,7 @@ on:
         type: string
         default: ""
       ticket-body:
-        description: "The whole body of a new alert ticket, on the Bug template. Blank keeps the CI body."
+        description: "The whole body of a new alert ticket, on the Alert template. Blank keeps the CI body."
         required: false
         type: string
         default: ""
@@ -174,7 +177,7 @@ jobs:
           BODY_INPUT: ${{ inputs.ticket-body }}
           DETAILS_INPUT: ${{ inputs.details }}
           # Where a new alert ticket lands on the board. A red main is genuinely next, so Up Next;
-          # Tech because only the CTO hat needs it; Coding because it ends in a PR (the Bug rules).
+          # Tech because only the CTO hat needs it; Coding because it ends in a PR.
           BOARD_STATUS: Up Next
           BOARD_TRACK: Tech
           BOARD_CATEGORY: Coding
@@ -357,7 +360,7 @@ jobs:
           esac
 
           cat > "$work/ticket.md" <<EOF
-          ## Symptom
+          ## Alert
 
           CI on \`$default_branch\` failed on $when.
 
@@ -367,19 +370,13 @@ jobs:
 
           $failed_jobs
 
-          ## Expected
+          Every branch cut from \`$default_branch\` now starts red. A PR opened now fails for a reason its author did not cause.
 
-          CI on \`$default_branch\` is green.
+          $impact_cause
 
-          ## Steps to Reproduce
+          Expected: CI on \`$default_branch\` is green.
 
-          | # | Step |
-          |---|---|
-          | S1 | Open the failed run: $run_url |
-          | S2 | Read the log of each failed job listed under Symptom. |
-          | S3 | Re-run the failed jobs. A failure that clears on a re-run is flaky, not fixed. Say so in a comment. |
-
-          ## Where
+          ## When
 
           | Fact | Value |
           |---|---|
@@ -389,26 +386,21 @@ jobs:
           | Workflow | \`$GITHUB_WORKFLOW\` |
           | Trigger | \`$GITHUB_EVENT_NAME\` |
           | First seen | $when |
-          | How found | The main red alert (the shared workflow in \`rapidlightningmedia/.github\`) |
 
-          ## Impact
+          ## How Found
 
-          Every branch cut from \`$default_branch\` now starts red. A PR opened now fails for a reason its author did not cause.
+          The main red alert, the shared workflow in \`rapidlightningmedia/.github\`, run as the last job of \`$GITHUB_WORKFLOW\`.
 
-          $impact_cause
+          While \`$default_branch\` stays red, each red run adds a comment here. The first green run adds a "green again" comment. The alert never closes this ticket. A person does.
 
-          ## Fix
+          ## First Steps
 
-          Not known yet. Whoever picks this up names the cause in a comment, then fixes it.
-
-          While \`$default_branch\` stays red, each red run adds a comment here. The first green run adds a "green again" comment. The alert never closes this ticket. A human does.
-
-          ## Acceptance Criteria
-
-          | # | Criterion |
+          | # | Step |
           |---|---|
-          | AC1 | CI on \`$default_branch\` is green again. |
-          | AC2 | A comment on this ticket names the cause. |
+          | S1 | Open the failed run: $run_url |
+          | S2 | Read the log of each failed job listed under Alert. |
+          | S3 | Re-run the failed jobs. A failure that clears on a re-run is flaky, not fixed. Say so in a comment. |
+          | S4 | Name the cause in a comment, then decide: fix it here, turn this ticket into a Bug, or close it. |
 
           ## Supporting Material
 
@@ -431,8 +423,9 @@ jobs:
           <!-- main-red-alert:red -->
           EOF
 
-          # A caller that watches something other than CI brings its own body. The red marker is added
-          # when the body lacks it, so the green-again logic reads the new ticket the same way.
+          # A caller that watches something other than CI brings its own body, on the Alert template.
+          # The red marker is added when the body lacks it, so the green-again logic reads the new
+          # ticket the same way.
           if [ -n "$BODY_INPUT" ]; then
             printf '%s\n' "$BODY_INPUT" > "$work/ticket.md"
             if ! grep -q 'main-red-alert:red' "$work/ticket.md"; then
@@ -441,7 +434,7 @@ jobs:
           fi
 
           if [ "$DRY_RUN" = "true" ]; then
-            echo "DRY RUN: would open '$TITLE' in $repo (type Bug, label $LABEL, assignee $ASSIGNEE)."
+            echo "DRY RUN: would open '$TITLE' in $repo (type Alert, label $LABEL, assignee $ASSIGNEE)."
             echo "DRY RUN: would parent it under $PARENT (${parent_title:-unreadable})."
             for r in ${resolved[@]+"${resolved[@]}"}; do
               echo "DRY RUN: would set board field ${r%%|*} = $(cut -d'|' -f2 <<<"$r")."
@@ -454,7 +447,7 @@ jobs:
               --description "CI on the default branch is red (the main red alert)" --force >/dev/null
 
             created="$(gh api -X POST "repos/$repo/issues" \
-              -f title="$TITLE" -f type=Bug -F body=@"$work/ticket.md" \
+              -f title="$TITLE" -f type=Alert -F body=@"$work/ticket.md" \
               -f "labels[]=$LABEL" -f "assignees[]=$ASSIGNEE")"
             issue_num="$(jq -r .number <<<"$created")"
             issue_id="$(jq -r .id <<<"$created")"
