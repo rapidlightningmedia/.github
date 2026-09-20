@@ -18,13 +18,18 @@ name: PR ticket link
 #
 # Cross-repo tickets (famlybot#82): the caller's GITHUB_TOKEN is repo-scoped and cannot see private
 # issues in another repo, so a PR that links owner/repo#N elsewhere reads as zero under it. On a
-# zero, we mint an org-scoped token from the rlm-board-cascade GitHub App and resolve the SAME field
+# zero, we mint an org-scoped token from the rlm-policy-keeper GitHub App and resolve the SAME field
 # again. Same-repo PRs (the common case) never mint, so they carry no dependency on the App key.
 #
 # This repo is PUBLIC, so this file is public. It holds no secrets. The App's client id below is
-# public (GET /apps/rlm-board-cascade returns it with no login), so it lives here, and each repo
-# needs ONE secret: BOARD_CASCADE_APP_PRIVATE_KEY. (JD's ruling, 09/10/2026-Thu, rlm-ops#558: the
-# client id replaced the deprecated app-id input and the BOARD_CASCADE_APP_ID secret.) Callers pass
+# public (GET /apps/rlm-policy-keeper returns it with no login), so it lives here, and each repo
+# needs ONE secret: POLICY_KEEPER_APP_PRIVATE_KEY. (JD's ruling, 09/10/2026-Thu, rlm-ops#558: the
+# client id replaced the deprecated app-id input and the BOARD_CASCADE_APP_ID secret.)
+#
+# BOTH secret names are accepted while the rename lands (rlm-ops#663, 09/20/2026-Sun). The App was
+# `rlm-board-cascade` until then, and its key is named BOARD_CASCADE_APP_PRIVATE_KEY on repos that
+# have not moved yet. A caller may pass either one; the new name wins when both arrive. The old
+# name comes out when every caller has moved. Callers pass
 # ONLY the key, by name. Never `secrets: inherit`: it hands EVERY secret in the caller's repo (cloud
 # keys, package tokens) to this public workflow, which needs just the one (JD's ruling, rlm-ops#558).
 # The org is on GitHub Free, where private repos cannot read org-level secrets, so the key is set
@@ -56,15 +61,18 @@ name: PR ticket link
 #       uses: rapidlightningmedia/.github/.github/workflows/pr-ticket-link.yml@main
 #       # Pass ONLY the App key, by name. Never `secrets: inherit`.
 #       secrets:
-#         BOARD_CASCADE_APP_PRIVATE_KEY: ${{ secrets.BOARD_CASCADE_APP_PRIVATE_KEY }}
+#         POLICY_KEEPER_APP_PRIVATE_KEY: ${{ secrets.POLICY_KEEPER_APP_PRIVATE_KEY }}
 #
 # The check reports as "ticket-link / PR links a ticket".
 
 on:
   workflow_call:
     secrets:
+      POLICY_KEEPER_APP_PRIVATE_KEY:
+        description: The rlm-policy-keeper App private key. Needed only when a PR links a ticket in another repo.
+        required: false
       BOARD_CASCADE_APP_PRIVATE_KEY:
-        description: The rlm-board-cascade App private key. Needed only when a PR links a ticket in another repo.
+        description: The same key under its pre-rename name (rlm-ops#663). Accepted until every caller has moved, then removed.
         required: false
 
 jobs:
@@ -119,7 +127,7 @@ jobs:
       - name: Check the App secret is set
         if: steps.resolve.outputs.cross_repo == 'true'
         env:
-          APP_KEY: ${{ secrets.BOARD_CASCADE_APP_PRIVATE_KEY }}
+          APP_KEY: ${{ secrets.POLICY_KEEPER_APP_PRIVATE_KEY || secrets.BOARD_CASCADE_APP_PRIVATE_KEY }}
           REPO: ${{ github.repository }}
         run: |
           set -euo pipefail
@@ -127,7 +135,7 @@ jobs:
           # Fail closed, with a message that says which of the two cases this might be. A missing
           # secret, or a fork PR (the pull_request trigger withholds secrets from forks), lands here.
           if [ -z "$APP_KEY" ]; then
-            echo "::error::This PR links no ticket that this repo can see. If it links no ticket at all, put 'Closes #N' on the FIRST line of the PR description. If it links a ticket in ANOTHER repo ('Closes owner/repo#N'), the check needs the BOARD_CASCADE_APP_PRIVATE_KEY secret to see that ticket, and $REPO does not have it. Set it on this repo (JD's hands), then re-run this check."
+            echo "::error::This PR links no ticket that this repo can see. If it links no ticket at all, put 'Closes #N' on the FIRST line of the PR description. If it links a ticket in ANOTHER repo ('Closes owner/repo#N'), the check needs the POLICY_KEEPER_APP_PRIVATE_KEY secret to see that ticket, and $REPO does not have it. Set it on this repo (JD's hands), then re-run this check."
             exit 1
           fi
 
@@ -136,15 +144,16 @@ jobs:
         if: steps.resolve.outputs.cross_repo == 'true'
         uses: actions/create-github-app-token@v3
         with:
-          # The rlm-board-cascade App's client id. Public by design: `gh api /apps/rlm-board-cascade`
-          # returns it with no login. Only the private key is a secret.
+          # The rlm-policy-keeper App's client id. Public by design: `gh api /apps/rlm-policy-keeper`
+          # returns it with no login. Only the private key is a secret. The id did not change with
+          # the 09/20/2026-Sun rename (rlm-ops#663).
           client-id: Iv23liYQpQkGrus2Q6Yc
-          private-key: ${{ secrets.BOARD_CASCADE_APP_PRIVATE_KEY }}
+          private-key: ${{ secrets.POLICY_KEEPER_APP_PRIVATE_KEY || secrets.BOARD_CASCADE_APP_PRIVATE_KEY }}
           # No `repositories:` -> the token can read every repo the App is installed on in this org,
           # so it sees both this PR and the ticket's repo. Resolving the closing reference needs the
           # App's Pull requests:Read (the PR side) and Issues:Read (the ticket side).
           owner: ${{ github.repository_owner }}
-          # Least scope. The App also holds Issues:Write and Projects:Write for board-cascade; without
+          # Least scope. The App also holds Issues:Write and Projects:Write for policy-keeper; without
           # these two lines the minted token would carry them too. The check only reads.
           permission-issues: read
           permission-pull-requests: read
