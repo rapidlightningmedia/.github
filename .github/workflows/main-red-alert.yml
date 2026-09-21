@@ -28,7 +28,7 @@ name: Main red alert
 # the parent, the open ticket), so each PR proves the alert path still works, and nothing is
 # written. A caller can also ask for a dry run on the default branch with `dry-run: true`.
 #
-# Tokens: the board and issue writes use a token minted from the rlm-board-cascade App (Issues
+# Tokens: the board and issue writes use a token minted from the rlm-policy-keeper App (Issues
 # write + org Projects write, nothing else), because the run's GITHUB_TOKEN cannot write an org
 # project or parent a ticket in another repo. The list of this run's failed jobs uses the run's
 # own token, because the App has no Actions permission - so the calling job must grant
@@ -51,7 +51,7 @@ name: Main red alert
 #       result: ${{ (contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')) && 'failure' || 'success' }}
 #       parent: rapidlightningmedia/rlm-ops#414
 #     secrets:
-#       BOARD_CASCADE_APP_PRIVATE_KEY: ${{ secrets.BOARD_CASCADE_APP_PRIVATE_KEY }}
+#       POLICY_KEEPER_APP_PRIVATE_KEY: ${{ secrets.POLICY_KEEPER_APP_PRIVATE_KEY }}
 #
 # `!cancelled()` and not `always()`: a run cancelled by a newer push says nothing, because the
 # newer run reports. The Bot guard: Dependabot PRs get no secrets, so they skip instead of failing.
@@ -120,9 +120,15 @@ on:
         type: string
         default: ""
     secrets:
+      POLICY_KEEPER_APP_PRIVATE_KEY:
+        description: The rlm-policy-keeper App private key. Every alert write uses it.
+        required: false
       BOARD_CASCADE_APP_PRIVATE_KEY:
-        description: The rlm-board-cascade App private key. Every alert write uses it.
-        required: true
+        description: The same key under its pre-rename name (rlm-ops#663). Accepted until every caller has moved, then removed.
+        required: false
+    # Neither is required at the workflow level while the rename lands, because a caller passes one
+    # name or the other. The first step below fails the run when NEITHER arrives, which is the same
+    # guard with a clearer message.
 
 jobs:
   alert:
@@ -139,11 +145,11 @@ jobs:
     steps:
       - name: Check the App secret is set
         env:
-          APP_KEY: ${{ secrets.BOARD_CASCADE_APP_PRIVATE_KEY }}
+          APP_KEY: ${{ secrets.POLICY_KEEPER_APP_PRIVATE_KEY || secrets.BOARD_CASCADE_APP_PRIVATE_KEY }}
           REPO: ${{ github.repository }}
         run: |
           if [ -z "$APP_KEY" ]; then
-            echo "::error::The main red alert needs the BOARD_CASCADE_APP_PRIVATE_KEY secret, and $REPO does not pass one. Set it on the repo (JD's hands) and pass it by name from the caller."
+            echo "::error::The main red alert needs the POLICY_KEEPER_APP_PRIVATE_KEY secret, and $REPO does not pass one. Set it on the repo (JD's hands) and pass it by name from the caller."
             exit 1
           fi
 
@@ -151,10 +157,11 @@ jobs:
         id: mint
         uses: actions/create-github-app-token@v3
         with:
-          # The rlm-board-cascade App's client id. Public by design: `gh api /apps/rlm-board-cascade`
-          # returns it with no login. Only the private key is a secret.
+          # The rlm-policy-keeper App's client id. Public by design: `gh api /apps/rlm-policy-keeper`
+          # returns it with no login. Only the private key is a secret. The id did not change with
+          # the 09/20/2026-Sun rename (rlm-ops#663).
           client-id: Iv23liYQpQkGrus2Q6Yc
-          private-key: ${{ secrets.BOARD_CASCADE_APP_PRIVATE_KEY }}
+          private-key: ${{ secrets.POLICY_KEEPER_APP_PRIVATE_KEY || secrets.BOARD_CASCADE_APP_PRIVATE_KEY }}
           # No `repositories:` -> the token reaches every repo the App is installed on in this org,
           # which the parent in another repo (the ops umbrellas live in rlm-ops) needs.
           owner: ${{ github.repository_owner }}
