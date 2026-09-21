@@ -26,10 +26,9 @@ name: PR ticket link
 # needs ONE secret: POLICY_KEEPER_APP_PRIVATE_KEY. (JD's ruling, 09/10/2026-Thu, rlm-ops#558: the
 # client id replaced the deprecated app-id input and the BOARD_CASCADE_APP_ID secret.)
 #
-# BOTH secret names are accepted while the rename lands (rlm-ops#663, 09/20/2026-Sun). The App was
-# `rlm-board-cascade` until then, and its key is named BOARD_CASCADE_APP_PRIVATE_KEY on repos that
-# have not moved yet. A caller may pass either one; the new name wins when both arrive. The old
-# name comes out when every caller has moved. Callers pass
+# The App was `rlm-board-cascade` and its key BOARD_CASCADE_APP_PRIVATE_KEY until 09/20/2026-Sun
+# (rlm-ops#663). Both names were accepted while the eleven callers moved one at a time; the old
+# name came out once the last one landed. Callers pass
 # ONLY the key, by name. Never `secrets: inherit`: it hands EVERY secret in the caller's repo (cloud
 # keys, package tokens) to this public workflow, which needs just the one (JD's ruling, rlm-ops#558).
 # The org is on GitHub Free, where private repos cannot read org-level secrets, so the key is set
@@ -70,9 +69,6 @@ on:
     secrets:
       POLICY_KEEPER_APP_PRIVATE_KEY:
         description: The rlm-policy-keeper App private key. Needed only when a PR links a ticket in another repo.
-        required: false
-      BOARD_CASCADE_APP_PRIVATE_KEY:
-        description: The same key under its pre-rename name (rlm-ops#663). Accepted until every caller has moved, then removed.
         required: false
 
 jobs:
@@ -127,7 +123,7 @@ jobs:
       - name: Check the App secret is set
         if: steps.resolve.outputs.cross_repo == 'true'
         env:
-          APP_KEY: ${{ secrets.POLICY_KEEPER_APP_PRIVATE_KEY || secrets.BOARD_CASCADE_APP_PRIVATE_KEY }}
+          APP_KEY: ${{ secrets.POLICY_KEEPER_APP_PRIVATE_KEY }}
           REPO: ${{ github.repository }}
         run: |
           set -euo pipefail
@@ -148,7 +144,7 @@ jobs:
           # returns it with no login. Only the private key is a secret. The id did not change with
           # the 09/20/2026-Sun rename (rlm-ops#663).
           client-id: Iv23liYQpQkGrus2Q6Yc
-          private-key: ${{ secrets.POLICY_KEEPER_APP_PRIVATE_KEY || secrets.BOARD_CASCADE_APP_PRIVATE_KEY }}
+          private-key: ${{ secrets.POLICY_KEEPER_APP_PRIVATE_KEY }}
           # No `repositories:` -> the token can read every repo the App is installed on in this org,
           # so it sees both this PR and the ticket's repo. Resolving the closing reference needs the
           # App's Pull requests:Read (the PR side) and Issues:Read (the ticket side).
