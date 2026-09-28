@@ -1,7 +1,7 @@
-# Generated from the ruled ticket-template spec (rlm-ops#484). Edit the spec, then this file, in the same motion.
-name: Phase
-description: 'A group under a Goal. Gets only the stations it needs (Plan tier: Blueprint + Build; Full tier: all seven).'
-type: Phase
+# Generated from the ruled ticket-template spec (rlm-ops#484, rlm-ops#786). Edit the spec, then this file, in the same motion.
+name: Announce
+description: 'The announce station. Tell the client and the public what shipped.'
+type: Announce
 projects:
 - rapidlightningmedia/11
 body:
@@ -15,30 +15,43 @@ body:
       - A new idea starts a new paragraph. A blank line between paragraphs.
       - Name a ticket as a full link: `[rlm-ops#448](https://github.com/rapidlightningmedia/rlm-ops/issues/448)`. Never a bare number.
       - Dates as `09/02/2026-Wed`. Quotes as `"..." (JD: 09/02/2026-Wed)`. Share files as `rlm-shared://path`.
-      - Tables and lists, liberally. Number every item someone may refer to later (O1, O2...).
+      - Tables and lists, liberally. Number every item someone may refer to later (A1, A2...).
       - Do not invent a fact. Write "not known at birth" instead.
+      - Full tier only. A Plan tier gets no Announce ticket, because a Plan tier is internal work and there is no one outside to tell.
 - type: textarea
-  id: scope
+  id: announce
   attributes:
-    label: Scope
-    description: What this phase covers and what it leaves out.
+    label: Announce
+    description: What shipped, and who hears about it.
   validations:
     required: true
 - type: textarea
-  id: desired-outcome
+  id: audience
   attributes:
-    label: Desired Outcome
-    description: A list, numbered O1, O2... What is true when this phase is done.
-    value: "- O1 \n- O2 \n"
+    label: Audience
+    description: 'A table: who is told, who tells them, and where. Client and public are the two standing rows.'
+    value: |
+      | Who is told | Who tells them | Where |
+      |---|---|---|
+      | Client | Account Manager |  |
+      | Public | Marketing and Sales | website, App Store listing, channels |
   validations:
     required: true
 - type: textarea
   id: timing
   attributes:
     label: Timing
-    description: 'Required. The timing in words: what has to happen first, what waits on this, and how the timing should run. Name the tickets that affect it and say how.'
+    description: 'The timing in words: what has to happen first, what waits on this, and how the timing should run. Name the tickets that affect it and say how.'
   validations:
     required: true
+- type: checkboxes
+  id: artifact-checklist
+  attributes:
+    label: Artifact Checklist
+    description: Tick each artifact as it lands. The paths go in a comment.
+    options:
+    - label: A1 Release Note
+    - label: A2 Version
 - type: textarea
   id: supporting-material
   attributes:

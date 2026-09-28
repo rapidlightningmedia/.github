@@ -16,11 +16,13 @@ The ruled shape behind the forms is written once, on the RLM share: `rlm-shared:
 | Architecture | The system-design phase: the ADR. | Overview |
 | Design | The branded mockups, after Architecture. | Screens |
 | Blueprint | The code shape: file-tree diff, signatures, control flow. | Shape |
+| Build | The build station. An umbrella that holds the slices. | Build |
 | Task | A workable ticket: a slice, a plain build, an ops task. Named Execution until 09/09/2026-Wed. | Mission |
 | Bug | Something is wrong. | Symptom |
 | Alert | Something went wrong and a person should look. A machine opens it; a person may turn it into a Bug. | Alert |
 | PR Ticket | The ticket a PR closes when one change lands in several repos. | Ruling |
 | Ops Umbrella | One of the seven standing shelves. Only on a ruling. | Purpose |
+| Announce | The announce station. Tell the client and the public what shipped. Full tier only. | Announce |
 
 A Quarter Bucket has no form. The board automation writes it when the first ticket under an ops umbrella is set Completed in a quarter (the Status was called Done until 09/09/2026-Wed, rlm-ops#542).
 
