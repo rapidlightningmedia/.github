@@ -21,7 +21,7 @@ body:
   id: build
   attributes:
     label: Build
-    description: What gets built, in plain words. It takes the place of Phase's Scope. Born empty at Decide; the Blueprint station fills it with slices at close.
+    description: What gets built, in plain words. It takes the place of Phase's Scope. Born empty at Decide; the Blueprint station fills it with slices at close (the Architecture station, in the Ops tier).
   validations:
     required: true
 - type: textarea
