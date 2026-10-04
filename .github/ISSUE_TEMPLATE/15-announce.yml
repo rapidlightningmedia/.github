@@ -17,7 +17,7 @@ body:
       - Dates as `09/02/2026-Wed`. Quotes as `"..." (JD: 09/02/2026-Wed)`. Share files as `rlm-shared://path`.
       - Tables and lists, liberally. Number every item someone may refer to later (A1, A2...).
       - Do not invent a fact. Write "not known at birth" instead.
-      - Full tier only. A Plan tier gets no Announce ticket, because a Plan tier is internal work and there is no one outside to tell.
+      - Full tier only. A Plan tier or an Ops tier gets no Announce ticket, because it is internal work and there is no one outside to tell.
 - type: textarea
   id: announce
   attributes:
