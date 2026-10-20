@@ -1,7 +1,7 @@
 # Generated from the ruled ticket-template spec (rlm-ops#484). Edit the spec, then this file, in the same motion.
-name: Ops Umbrella
-description: 'One of the seven standing shelves (rlm-ops#412 to #418). Nobody births one without a ruling.'
-type: Ops Umbrella
+name: Run
+description: 'One of the nine standing shelves (rlm-ops#412 to #418). Nobody births one without a ruling.'
+type: Run
 projects:
 - rapidlightningmedia/11
 body:

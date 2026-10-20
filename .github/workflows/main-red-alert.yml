@@ -13,7 +13,7 @@ name: Main red alert
 #
 # What it does, per run:
 #   red,   no alert ticket open   -> open one: type Alert, label ci-main-red, assigned to JD, parented
-#                                    under the repo's ops umbrella, on the board at Up Next / Tech /
+#                                    under the repo's Run umbrella, on the board at Up Next / Tech /
 #                                    Coding. The body is on the Alert template, so the lint passes.
 #   red,   alert ticket open      -> one comment: "still red" or "red again", with the failed jobs.
 #   green, alert ticket open      -> one "green again" comment, only if its last word was red.
@@ -76,7 +76,7 @@ on:
         required: true
         type: string
       parent:
-        description: "The ops umbrella the alert ticket is parented under, as owner/repo#N."
+        description: "The Run umbrella the alert ticket is parented under, as owner/repo#N."
         required: true
         type: string
       assignee:
@@ -157,7 +157,7 @@ jobs:
           client-id: Iv23liYQpQkGrus2Q6Yc
           private-key: ${{ secrets.POLICY_KEEPER_APP_PRIVATE_KEY }}
           # No `repositories:` -> the token reaches every repo the App is installed on in this org,
-          # which the parent in another repo (the ops umbrellas live in rlm-ops) needs.
+          # which the parent in another repo (the Run umbrellas live in rlm-ops) needs.
           owner: ${{ github.repository_owner }}
           # Least scope: the two permissions the alert writes with, and nothing else.
           permission-issues: write
@@ -418,7 +418,7 @@ jobs:
 
           | Relationship | Ticket | Description |
           |---|---|---|
-          | Parent | [$PARENT](https://github.com/$parent_owner/$parent_repo/issues/$parent_num) | ${parent_title:-The ops umbrella for this repo} |
+          | Parent | [$PARENT](https://github.com/$parent_owner/$parent_repo/issues/$parent_num) | ${parent_title:-The Run umbrella for this repo} |
           | Where the alert was built | [famlybot#138](https://github.com/rapidlightningmedia/famlybot/issues/138) | Run CI on a schedule so a broken main gets noticed |
 
           <!-- main-red-alert:red -->

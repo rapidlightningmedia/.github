@@ -21,10 +21,10 @@ The ruled shape behind the forms is written once, on the RLM share: `rlm-shared:
 | Bug | Something is wrong. | Symptom |
 | Alert | Something went wrong and a person should look. A machine opens it; a person may turn it into a Bug. | Alert |
 | PR Ticket | The ticket a PR closes when one change lands in several repos. | Ruling |
-| Ops Umbrella | One of the seven standing shelves. Only on a ruling. | Purpose |
+| Run | One of the nine standing shelves (the type was Ops Umbrella until 10/20/2026-Tue). Only on a ruling. | Purpose |
 | Announce | The announce station. Tell the client and the public what shipped. Full tier only. | Announce |
 
-A Quarter Bucket has no form. The board automation writes it when the first ticket under an ops umbrella is set Completed in a quarter (the Status was called Done until 09/09/2026-Wed, rlm-ops#542).
+A Quarter Bucket has no form. The board automation writes it when the first ticket under a Run umbrella is set Completed in a quarter (the Status was called Done until 09/09/2026-Wed, rlm-ops#542).
 
 ## How to write it
 
