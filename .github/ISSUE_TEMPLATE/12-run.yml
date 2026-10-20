@@ -1,6 +1,6 @@
 # Generated from the ruled ticket-template spec (rlm-ops#484). Edit the spec, then this file, in the same motion.
 name: Run
-description: 'One of the nine standing shelves (rlm-ops#412 to #418). Nobody births one without a ruling.'
+description: 'One of the nine standing shelves (rlm-ops#412 to #418, #749 and #926). Nobody births one without a ruling.'
 type: Run
 projects:
 - rapidlightningmedia/11
