@@ -15,7 +15,8 @@ description: Wait until an Azure Static Web App serves THIS build, then check th
 # So this action first waits until the live site serves the build id that
 # static-web-app-stamp wrote before the upload. Only then does it check anything else:
 #
-#   1. The live site serves this build (_deploy/build-id.txt equals the commit SHA).
+#   1. The live site serves this build (_deploy/build-id.txt equals the build id: the build-id
+#      input, or the commit SHA when it is empty).
 #      Polls every 10 seconds, up to wait-seconds, then fails red.
 #   2. The live root is byte for byte the built index.html.
 #   3. The root is no-cache.
@@ -41,6 +42,8 @@ description: Wait until an Azure Static Web App serves THIS build, then check th
 #       build-dir: build
 #       # optional: a client-side route this app must serve, e.g. a magic-link path
 #       # fallback-path: /auth/redeem/deep-link-that-only-exists-client-side
+#       # optional: the same id the stamp got (empty = github.sha)
+#       # build-id: ${{ inputs.tag }}
 #
 # A repo-only check (famlybot's API CORS) runs as its own step after this one and reads the host
 # from `steps.verify.outputs.host`.
@@ -63,6 +66,10 @@ inputs:
     description: How long to wait for this build to go live before failing red.
     required: false
     default: '300'
+  build-id:
+    description: The id the stamp wrote, which the live site must serve. Empty (the default) = this run's commit, github.sha. A Deploy-by-tag run passes the tag going live, because there github.sha is main's head (rlm-ops#1031).
+    required: false
+    default: ''
 
 outputs:
   host:
@@ -97,7 +104,7 @@ runs:
       env:
         HOST: ${{ steps.host.outputs.host }}
         BUILD_DIR: ${{ inputs.build-dir }}
-        BUILD_ID: ${{ github.sha }}
+        BUILD_ID: ${{ inputs.build-id || github.sha }}
         FALLBACK_PATH: ${{ inputs.fallback-path }}
         WAIT_SECONDS: ${{ inputs.wait-seconds }}
       run: bash "$GITHUB_ACTION_PATH/verify.sh"
