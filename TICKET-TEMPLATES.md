@@ -17,6 +17,7 @@ The ruled shape behind the forms is written once, on the RLM share: `rlm-shared:
 | Design | The branded mockups, after Architecture. | Screens |
 | Blueprint | The code shape: file-tree diff, signatures, control flow. | Shape |
 | Build | The build station. An umbrella that holds the slices. | Build |
+| Outcome | One thing a person can open and test, under a Build. Holds the Tasks that build it; lands In Review when its last Task closes. | Outcome |
 | Task | A workable ticket: a slice, a plain build, an ops task. Named Execution until 09/09/2026-Wed. | Mission |
 | Bug | Something is wrong. | Symptom |
 | Alert | Something went wrong and a person should look. A machine opens it; a person may turn it into a Bug. | Alert |

@@ -1,0 +1,72 @@
+# Generated from the ruled ticket-template spec (rlm-ops#484, rlm-ops#1013). Edit the spec, then this file, in the same motion.
+name: Outcome
+description: 'One thing a person can open and test. Groups the Tasks that build it; lands In Review when its last child closes. Parent = the Build.'
+type: Outcome
+projects:
+- rapidlightningmedia/11
+body:
+- type: markdown
+  attributes:
+    value: |-
+      **How to write this ticket** (the full rules: `rlm-shared://_templates/tickets/ticket-templates.md`)
+
+      - Plain, simple English. Short sentences. One idea per sentence. Write for a person who opens this cold.
+      - Do not condense. Three facts are three sentences.
+      - A new idea starts a new paragraph. A blank line between paragraphs.
+      - Name a ticket as a full link: `[rlm-ops#448](https://github.com/rapidlightningmedia/rlm-ops/issues/448)`. Never a bare number.
+      - Dates as `09/02/2026-Wed`. Quotes as `"..." (JD: 09/02/2026-Wed)`. Share files as `rlm-shared://path`.
+      - Tables and lists, liberally. Number every item someone may refer to later (S1, S2...).
+      - Do not invent a fact. Write "not known at birth" instead.
+- type: textarea
+  id: outcome
+  attributes:
+    label: Outcome
+    description: 'The one thing a person can open and test, in plain words. Name the row of the Build''s Desired Outcome list it comes from (O1, O2...).'
+  validations:
+    required: true
+- type: textarea
+  id: the-walk
+  attributes:
+    label: The walk
+    description: 'Numbered steps a person takes in the app to see the whole Outcome, and what they should see at each step. This is what the reviewer does at Verify.'
+    value: "1. \n2. \n3. \n"
+  validations:
+    required: true
+- type: textarea
+  id: done-when
+  attributes:
+    label: Done when
+    description: 'The person does the walk and accepts it. Every Task under this Outcome is closed by its worker, after its PRs merged and its post-merge steps are done.'
+    value: 'JD does the walk and accepts it. Every Task under this Outcome is closed by its worker after its PRs merged and its post-merge steps are done.'
+  validations:
+    required: true
+- type: textarea
+  id: supporting-material
+  attributes:
+    label: Supporting Material
+    description: A table. One row per file, transcript, mockup or document that supports this ticket. Number them SM1, SM2... Share files as `rlm-shared://path`. Write `None` in the first row if there is nothing.
+    value: |
+      | ID | Description | Location |
+      |---|---|---|
+      | SM1 |  |  |
+  validations:
+    required: true
+- type: textarea
+  id: origin
+  attributes:
+    label: Origin
+    description: 'One line: **Requested by** *person* **on** *date* **@** *circumstance*. Who asked for this, when, and where.'
+    placeholder: Requested by JD on 09/08/2026-Tue @ the product meeting
+  validations:
+    required: true
+- type: textarea
+  id: related-tickets
+  attributes:
+    label: Related Tickets
+    description: A table. Every ticket this one relates to, as a full link, with the relationship in words (Parent, Origin ticket, Sibling, Blocks...). Do not list children or Blocked By edges - the board shows those. Write `None` in the first row if there is nothing.
+    value: |
+      | Relationship | Ticket | Description |
+      |---|---|---|
+      |  |  |  |
+  validations:
+    required: true
