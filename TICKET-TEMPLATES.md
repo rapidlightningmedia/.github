@@ -23,6 +23,7 @@ The ruled shape behind the forms is written once, on the RLM share: `rlm-shared:
 | PR Ticket | The ticket a PR closes when one change lands in several repos. | Ruling |
 | Run | One of the nine standing shelves (the type was Ops Umbrella until 10/20/2026-Tue). Only on a ruling. | Purpose |
 | Announce | The announce station. Tell the client and the public what shipped. Full tier only. | Announce |
+| Checkpoint | A signed checklist at the end of a Goal: Product Sign-off or Tech Sign-off. Decide births them; you rarely open one by hand. | Checkpoint |
 
 A Quarter Bucket has no form. The board automation writes it when the first ticket under a Run umbrella is set Completed in a quarter (the Status was called Done until 09/09/2026-Wed, rlm-ops#542).
 
