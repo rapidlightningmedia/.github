@@ -1,0 +1,74 @@
+# Generated from the ruled ticket-template spec (rlm-ops#484). Edit the spec, then this file, in the same motion.
+name: Checkpoint
+description: 'A signed checklist: Product Sign-off or Tech Sign-off. Decide births them; only the seat on a box ticks it. Parent = the Goal.'
+type: Checkpoint
+projects:
+- rapidlightningmedia/11
+body:
+- type: markdown
+  attributes:
+    value: |-
+      **How to write this ticket** (the full rules: `rlm-shared://_templates/tickets/ticket-templates.md`)
+
+      - Plain, simple English. Short sentences. One idea per sentence. Write for a person who opens this cold.
+      - Do not condense. Three facts are three sentences.
+      - A new idea starts a new paragraph. A blank line between paragraphs.
+      - Name a ticket as a full link: `[rlm-ops#448](https://github.com/rapidlightningmedia/rlm-ops/issues/448)`. Never a bare number.
+      - Dates as `09/02/2026-Wed`. Quotes as `"..." (JD: 09/02/2026-Wed)`. Share files as `rlm-shared://path`.
+      - Tables and lists, liberally. Number every item someone may refer to later (S1, S2... AC1, AC2...).
+      - Do not invent a fact. Write "not known at birth" instead.
+- type: textarea
+  id: checkpoint
+  attributes:
+    label: Checkpoint
+    description: 'What is being signed: the Goal, the build on werkstatt, and its tag. Name the seat that signs (Product Sign-off: the Product Manager; Tech Sign-off: the CTO), never the person.'
+  validations:
+    required: true
+- type: textarea
+  id: boxes
+  attributes:
+    label: Boxes
+    description: 'A table, numbered B1, B2... One row per box: what is checked, the seat that ticks it, when, and Ticked ([ ] until the seat ticks it, then [x] and the date). The two checklists are in the ticket templates doc, CHECKPOINT. An unticked box is a visible stamp.'
+    value: |
+      | # | Box | Seat | When | Ticked |
+      |---|---|---|---|---|
+      | B1 |  |  |  | [ ] |
+  validations:
+    required: true
+- type: textarea
+  id: timing
+  attributes:
+    label: Timing
+    description: 'What has to close first, and what waits on this. Product Sign-off waits on Guides (Full tier) or Build (Plan tier); Tech Sign-off waits on Product Sign-off (Ops tier: on Build); Deploy waits on Tech Sign-off.'
+  validations:
+    required: true
+- type: textarea
+  id: supporting-material
+  attributes:
+    label: Supporting Material
+    description: A table. One row per file, transcript, mockup or document that supports this ticket. Number them SM1, SM2... Share files as `rlm-shared://path`. Write `None` in the first row if there is nothing.
+    value: |
+      | ID | Description | Location |
+      |---|---|---|
+      | SM1 |  |  |
+  validations:
+    required: true
+- type: textarea
+  id: origin
+  attributes:
+    label: Origin
+    description: 'One line: **Requested by** *person* **on** *date* **@** *circumstance*. Who asked for this, when, and where.'
+    placeholder: Requested by JD on 09/08/2026-Tue @ the product meeting
+  validations:
+    required: true
+- type: textarea
+  id: related-tickets
+  attributes:
+    label: Related Tickets
+    description: A table. Every ticket this one relates to, as a full link, with the relationship in words (Parent, Origin ticket, Sibling, Blocks, Where Phase 3 lives...). Do not list children or Blocked By edges - the board shows those. Write `None` in the first row if there is nothing.
+    value: |
+      | Relationship | Ticket | Description |
+      |---|---|---|
+      |  |  |  |
+  validations:
+    required: true
