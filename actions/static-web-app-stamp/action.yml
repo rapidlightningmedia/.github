@@ -1,5 +1,5 @@
 name: Stamp a Static Web App build
-description: Write this commit's SHA into the build folder as _deploy/build-id.txt, so the verify action can tell this build from the one already live.
+description: Write this commit's SHA (or the build-id input) into the build folder as _deploy/build-id.txt, so the verify action can tell this build from the one already live.
 
 # The first half of the shared Static Web App deploy check (rlm-ops#559). Run it AFTER the build
 # and BEFORE the upload. The second half, static-web-app-verify, runs after the upload and waits
@@ -15,11 +15,17 @@ description: Write this commit's SHA into the build folder as _deploy/build-id.t
 #     uses: rapidlightningmedia/.github/actions/static-web-app-stamp@main
 #     with:
 #       build-dir: build
+#       # optional: on a Deploy-by-tag run, the tag going live (empty = github.sha)
+#       # build-id: ${{ inputs.tag }}
 
 inputs:
   build-dir:
     description: The folder the deploy step uploads. It must already hold the built index.html.
     required: true
+  build-id:
+    description: The id to stamp. Empty (the default) = this run's commit, github.sha. A Deploy-by-tag run passes the tag going live, because there github.sha is main's head (rlm-ops#1031).
+    required: false
+    default: ''
 
 runs:
   using: composite
@@ -28,7 +34,7 @@ runs:
       shell: bash
       env:
         BUILD_DIR: ${{ inputs.build-dir }}
-        BUILD_ID: ${{ github.sha }}
+        BUILD_ID: ${{ inputs.build-id || github.sha }}
       run: |
         set -euo pipefail
 
