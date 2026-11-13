@@ -1,6 +1,6 @@
-# Generated from the ruled ticket-template spec (rlm-ops#484, rlm-ops#1013). Edit the spec, then this file, in the same motion.
+# Generated from the ruled ticket-template spec (rlm-ops#484, rlm-ops#1013, rlm-ops#1131). Edit the spec, then this file, in the same motion.
 name: Outcome
-description: 'One thing a person can open and test. Groups the Tasks that build it; lands In Review when its last child closes. Parent = the Build.'
+description: 'One thing a person can open and test. Groups the Tasks that build it; lands In Review when its last child closes. Parent = the Build, or a Run umbrella for an operations Outcome.'
 type: Outcome
 projects:
 - rapidlightningmedia/11
@@ -21,14 +21,14 @@ body:
   id: outcome
   attributes:
     label: Outcome
-    description: 'The one thing a person can open and test, in plain words. Name the row of the Build''s Desired Outcome list it comes from (O1, O2...).'
+    description: 'The one thing a person can open and test, in plain words. Name the row of the Build''s Desired Outcome list it comes from (O1, O2...). An operations Outcome under a Run umbrella has no Build above it and names no row.'
   validations:
     required: true
 - type: textarea
   id: the-walk
   attributes:
     label: The walk
-    description: 'Numbered steps a person takes in the app to see the whole Outcome, and what they should see at each step. This is what the reviewer does at Verify.'
+    description: 'Numbered steps a person takes in the app to see the whole Outcome, and what they should see at each step. For an operations Outcome, the steps are on the box, in the tool or in a session. This is what the reviewer does at Verify.'
     value: "1. \n2. \n3. \n"
   validations:
     required: true
