@@ -1,0 +1,89 @@
+# Copy of the shape on the ticket shapes page, part "Shapes in the New Tree" (rlm-ops#1229).
+# The source is rlm-shared://_templates/tickets/ticket-templates.md. Change the page first, then this file, at the same time.
+name: "Alert (new tree)"
+description: "From the Operating Model 3.0 move on. Something went wrong and a person should look. A machine usually opens it. The parent is the Run of what broke, and company tooling goes under RLM Company - Run."
+type: "Alert"
+projects:
+- rapidlightningmedia/11
+body:
+- type: markdown
+  attributes:
+    value: |-
+      **How to write this ticket** (the full rules: `rlm-shared://_templates/tickets/ticket-templates.md`, "Shapes in the New Tree")
+
+      - Plain, simple English. Short sentences. One idea per sentence. Write for a person who opens this cold.
+      - Do not condense. Three facts are three sentences.
+      - A new idea starts a new paragraph. A blank line between paragraphs.
+      - Name a ticket as a full link: `[rlm-ops#448](https://github.com/rapidlightningmedia/rlm-ops/issues/448)`. Never a bare number.
+      - Dates as `11/18/2026-Wed`. Share files as `rlm-shared://path`.
+      - Tables and lists, liberally. Number every item someone may refer to later (S1, S2...).
+      - Do not invent a fact. Write "not known yet" instead.
+      - Never name a session. Point only at what anyone can open: a ticket, a pull request, a file on a share, a URL, a role.
+- type: textarea
+  id: alert
+  attributes:
+    label: Alert
+    description: "What went wrong, in plain words. The first paragraph says what broke and where. Then the detail the watcher saw."
+  validations:
+    required: true
+- type: textarea
+  id: when
+  attributes:
+    label: When
+    description: "A table: first seen, trigger, the run, and the commit or the window when there is one."
+    value: |
+      | Fact | Value |
+      |---|---|
+      | First seen |  |
+      | Trigger |  |
+      | Run |  |
+  validations:
+    required: true
+- type: textarea
+  id: how-found
+  attributes:
+    label: How Found
+    description: "The watcher that raised the Alert, and where it lives. Each red run adds a comment, the first clean run adds a \"green again\" comment, and a person closes the ticket."
+  validations:
+    required: true
+- type: textarea
+  id: first-steps
+  attributes:
+    label: First Steps
+    description: "A table, numbered S1, S2... The last step is always: name the cause in a comment, then decide to fix it here, change the type to Bug, or close the ticket."
+    value: |
+      | # | Step |
+      |---|---|
+      | S1 |  |
+  validations:
+    required: true
+- type: textarea
+  id: supporting-material
+  attributes:
+    label: Supporting Material
+    description: "A table. One row per file, transcript, mockup or document that supports this ticket. Number them SM1, SM2... Share files as `rlm-shared://path`. Write `None` in the first row if there is nothing."
+    value: |
+      | ID | Description | Location |
+      |---|---|---|
+      | SM1 |  |  |
+  validations:
+    required: true
+- type: textarea
+  id: origin
+  attributes:
+    label: Origin
+    description: "One line: **Requested by** *person* **on** *date* **@** *circumstance*. Who asked for this, when, and where."
+    placeholder: "Requested by JD on 11/18/2026-Wed @ the product meeting"
+  validations:
+    required: true
+- type: textarea
+  id: related-tickets
+  attributes:
+    label: Related Tickets
+    description: "A table. Every ticket this one relates to, as a full link, with the relationship in words (Parent, Origin ticket, Sibling, Blocks...). Do not list children or Blocked By edges. The board shows those. Write `None` in the first row if there is nothing."
+    value: |
+      | Relationship | Ticket | Description |
+      |---|---|---|
+      |  |  |  |
+  validations:
+    required: true

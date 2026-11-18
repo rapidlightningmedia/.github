@@ -28,6 +28,24 @@ The ruled shape behind the forms is written once, on the RLM share: `rlm-shared:
 
 A Quarter Bucket has no form. The board automation writes it when the first ticket under a Run umbrella is set Completed in a quarter (the Status was called Done until 09/09/2026-Wed, rlm-ops#542).
 
+## From the Move On
+
+The Operating Model 3.0 move puts the board in a new tree of Goals, Stages and Steps. From the day the move starts, a ticket started by hand uses a form from the table below. Until then, the forms above are in use. The last Task of the move removes the forms above, and the words "(new tree)" come off the names below.
+
+The source of these forms is the part "Shapes in the New Tree" of the ticket shapes page, `rlm-shared://_templates/tickets/ticket-templates.md`.
+
+| Form | Type | Pick it when | First heading |
+|---|---|---|---|
+| Idea (new tree) | Idea | A thought you do not want to lose. Board automation adds its Explore and Decide Steps. | Proposed |
+| Outcome (new tree) | Outcome | One thing a person can open and test, under the Build Stage, a Run or a Market. The title starts `O1: `. | Outcome |
+| Task (new tree) | Task | A unit of work for one doer. | Mission |
+| Decide Task (new tree) | Task | A Task that holds a ruling. The title starts `Decide`. | Mission |
+| Bug (new tree) | Bug | The code is wrong. A bug in a released version goes under that version's Run. | Symptom |
+| Alert (new tree) | Alert | Something went wrong and a person should look. A machine usually opens it. | Alert |
+| PR Ticket (new tree) | PR Ticket | The ticket a pull request closes when one change is merged in several repos. | Ruling |
+
+Goals, Stages, Steps and Quarter Buckets have no form. Board automation makes each of them.
+
 ## How to write it
 
 Plain, simple English. Short sentences. One idea per sentence. Write for a person who opens the ticket cold.
