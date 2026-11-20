@@ -1,7 +1,7 @@
 # Copy of the shape on the ticket shapes page, part "Shapes in the New Tree" (rlm-ops#1229).
 # The source is rlm-shared://_templates/tickets/ticket-templates.md. Change the page first, then this file, at the same time.
-name: "Bug (new tree)"
-description: "From the Operating Model 3.0 move on. The code is wrong and someone should fix it. A bug in a released version goes under that version's Run."
+name: "Bug"
+description: "The code is wrong and someone should fix it. A bug in a released version goes under that version's Run."
 type: "Bug"
 projects:
 - rapidlightningmedia/11

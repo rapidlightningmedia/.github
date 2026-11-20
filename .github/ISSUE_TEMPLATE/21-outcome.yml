@@ -1,7 +1,7 @@
 # Copy of the shape on the ticket shapes page, part "Shapes in the New Tree" (rlm-ops#1229).
 # The source is rlm-shared://_templates/tickets/ticket-templates.md. Change the page first, then this file, at the same time.
-name: "Outcome (new tree)"
-description: "From the Operating Model 3.0 move on. One thing a person can open and test. The parent is the Build Stage, a Run or a Market."
+name: "Outcome"
+description: "One thing a person can open and test. The parent is the Build Stage, a Run or a Market."
 title: "O1: "
 type: "Outcome"
 projects:

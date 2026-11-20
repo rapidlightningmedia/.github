@@ -1,7 +1,7 @@
 # Copy of the shape on the ticket shapes page, part "Shapes in the New Tree" (rlm-ops#1229).
 # The source is rlm-shared://_templates/tickets/ticket-templates.md. Change the page first, then this file, at the same time.
-name: "PR Ticket (new tree)"
-description: "From the Operating Model 3.0 move on. The ticket a pull request in this repo closes when one change is merged in several repos. Made in the repo where the change is merged. The parent is the origin ticket's parent."
+name: "PR Ticket"
+description: "The ticket a pull request in this repo closes when one change is merged in several repos. Made in the repo where the change is merged. The parent is the origin ticket's parent."
 type: "PR Ticket"
 projects:
 - rapidlightningmedia/11

@@ -1,7 +1,7 @@
 # Copy of the shape on the ticket shapes page, part "Shapes in the New Tree" (rlm-ops#1229).
 # The source is rlm-shared://_templates/tickets/ticket-templates.md. Change the page first, then this file, at the same time.
-name: "Idea (new tree)"
-description: "From the Operating Model 3.0 move on. A thought written down so it is not lost. Board automation adds its Explore and Decide Steps."
+name: "Idea"
+description: "A thought written down so it is not lost. Board automation adds its Explore and Decide Steps."
 type: "Idea"
 projects:
 - rapidlightningmedia/11
