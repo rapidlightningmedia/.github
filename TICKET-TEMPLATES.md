@@ -4,45 +4,19 @@ Every ticket in a Rapid Lightning Media repo is born on the form for its type. T
 
 The ruled shape behind the forms is written once, on the RLM share: `rlm-shared://_templates/tickets/ticket-templates.md`. The worked example for every type sits beside it in `samples.md`. The forms, the `/open-ticket` command in both Claude kits, and the board automation's template check all follow that one file. Change the spec first, then the three copies, in the same motion.
 
-## Pick the form
-
-| Type | Pick it when | First heading |
-|---|---|---|
-| Idea | A thought you do not want to lose. Not decided yet. | Proposed |
-| Decision | A call that needs a ruling. | Question |
-| Goal | The top umbrella of a program, a roadmap row. | Summary |
-| Phase | A group under a Goal. | Scope |
-| Discovery | The product phase: rough mockups, what/why/success. | Objective |
-| Architecture | The system-design phase: the ADR. | Overview |
-| Design | The branded mockups, after Architecture. | Screens |
-| Blueprint | The code shape: file-tree diff, signatures, control flow. | Shape |
-| Build | The build station. An umbrella that holds the slices. | Build |
-| Outcome | One thing a person can open and test, under a Build. Holds the Tasks that build it; lands In Review when its last Task closes. | Outcome |
-| Task | A workable ticket: a slice, a plain build, an ops task. Named Execution until 09/09/2026-Wed. | Mission |
-| Bug | Something is wrong. | Symptom |
-| Alert | Something went wrong and a person should look. A machine opens it; a person may turn it into a Bug. | Alert |
-| PR Ticket | The ticket a PR closes when one change lands in several repos. | Ruling |
-| Run | One of the nine standing shelves (the type was Ops Umbrella until 10/20/2026-Tue). Only on a ruling. | Purpose |
-| Announce | The announce station. Tell the client and the public what shipped. Full tier only. | Announce |
-| Checkpoint | A signed checklist at the end of a Goal: Product Sign-off or Tech Sign-off. Decide births them; you rarely open one by hand. | Checkpoint |
-
-A Quarter Bucket has no form. The board automation writes it when the first ticket under a Run umbrella is set Completed in a quarter (the Status was called Done until 09/09/2026-Wed, rlm-ops#542).
-
-## From the Move On
-
-The Operating Model 3.0 move puts the board in a new tree of Goals, Stages and Steps. From the day the move starts, a ticket started by hand uses a form from the table below. Until then, the forms above are in use. The last Task of the move removes the forms above, and the words "(new tree)" come off the names below.
+## Pick the Form
 
 The source of these forms is the part "Shapes in the New Tree" of the ticket shapes page, `rlm-shared://_templates/tickets/ticket-templates.md`.
 
 | Form | Type | Pick it when | First heading |
 |---|---|---|---|
-| Idea (new tree) | Idea | A thought you do not want to lose. Board automation adds its Explore and Decide Steps. | Proposed |
-| Outcome (new tree) | Outcome | One thing a person can open and test, under the Build Stage, a Run or a Market. The title starts `O1: `. | Outcome |
-| Task (new tree) | Task | A unit of work for one doer. | Mission |
-| Decide Task (new tree) | Task | A Task that holds a ruling. The title starts `Decide`. | Mission |
-| Bug (new tree) | Bug | The code is wrong. A bug in a released version goes under that version's Run. | Symptom |
-| Alert (new tree) | Alert | Something went wrong and a person should look. A machine usually opens it. | Alert |
-| PR Ticket (new tree) | PR Ticket | The ticket a pull request closes when one change is merged in several repos. | Ruling |
+| Idea | Idea | A thought you do not want to lose. Board automation adds its Explore and Decide Steps. | Proposed |
+| Outcome | Outcome | One thing a person can open and test, under the Build Stage, a Run or a Market. The title starts `O1: `. | Outcome |
+| Task | Task | A unit of work for one doer. | Mission |
+| Decide Task | Task | A Task that holds a ruling. The title starts `Decide`. | Mission |
+| Bug | Bug | The code is wrong. A bug in a released version goes under that version's Run. | Symptom |
+| Alert | Alert | Something went wrong and a person should look. A machine usually opens it. | Alert |
+| PR Ticket | PR Ticket | The ticket a pull request closes when one change is merged in several repos. | Ruling |
 
 Goals, Stages, Steps and Quarter Buckets have no form. Board automation makes each of them.
 

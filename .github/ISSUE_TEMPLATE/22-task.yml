@@ -1,7 +1,7 @@
 # Copy of the shape on the ticket shapes page, part "Shapes in the New Tree" (rlm-ops#1229).
 # The source is rlm-shared://_templates/tickets/ticket-templates.md. Change the page first, then this file, at the same time.
-name: "Task (new tree)"
-description: "From the Operating Model 3.0 move on. Unit of work for one doer. A Task that holds a ruling uses the Decide Task form."
+name: "Task"
+description: "Unit of work for one doer. A Task that holds a ruling uses the Decide Task form."
 type: "Task"
 projects:
 - rapidlightningmedia/11

@@ -1,7 +1,7 @@
 # Copy of the shape on the ticket shapes page, part "Shapes in the New Tree" (rlm-ops#1229).
 # The source is rlm-shared://_templates/tickets/ticket-templates.md. Change the page first, then this file, at the same time.
-name: "Decide Task (new tree)"
-description: "From the Operating Model 3.0 move on. Task that holds a ruling. The title starts with Decide, and the ruling goes in the Ruling part of the description."
+name: "Decide Task"
+description: "Task that holds a ruling. The title starts with Decide, and the ruling goes in the Ruling part of the description."
 title: "Decide "
 type: "Task"
 projects:

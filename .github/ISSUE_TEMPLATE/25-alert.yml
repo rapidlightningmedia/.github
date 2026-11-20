@@ -1,7 +1,7 @@
 # Copy of the shape on the ticket shapes page, part "Shapes in the New Tree" (rlm-ops#1229).
 # The source is rlm-shared://_templates/tickets/ticket-templates.md. Change the page first, then this file, at the same time.
-name: "Alert (new tree)"
-description: "From the Operating Model 3.0 move on. Something went wrong and a person should look. A machine usually opens it. The parent is the Run of what broke, and company tooling goes under RLM Company - Run."
+name: "Alert"
+description: "Something went wrong and a person should look. A machine usually opens it. The parent is the Run of what broke, and company tooling goes under RLM Company - Run."
 type: "Alert"
 projects:
 - rapidlightningmedia/11
