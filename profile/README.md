@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="Logo.png" alt="Rapid Lightning Media" width="180"/>
+  <img src="RLM-Circle-Badge.png" alt="Rapid Lightning Media" width="200"/>
 </p>
 
 <h1 align="center">RAPID LIGHTNING MEDIA</h1>
