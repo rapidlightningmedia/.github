@@ -79,9 +79,11 @@ jobs:
       contents: read
       pull-requests: read
       issues: read
-    # Bot PRs (Dependabot) have no ticket and must not acquire one. Exempt by author, never by an
-    # opt-out label, so the exemption cannot be borrowed by a human PR.
-    if: github.event.pull_request.user.type != 'Bot'
+    # Dependabot is the only exempt author: its version bumps have no ticket and must not acquire
+    # one. Exempt by author name, never by an opt-out label, so the exemption cannot be borrowed by
+    # a human PR. Every other bot is checked like a person, including the automated worker
+    # rlm-bot-app[bot] (rlm-ops#1402; JD, 11/27/2026-Fri: every pull request links a ticket).
+    if: github.event.pull_request.user.login != 'dependabot[bot]'
     steps:
       - name: Resolve visible linked tickets
         id: resolve

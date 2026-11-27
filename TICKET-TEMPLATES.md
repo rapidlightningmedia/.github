@@ -16,7 +16,7 @@ The source of these forms is the part "Shapes in the New Tree" of the ticket sha
 | Decide Task | Task | A Task that holds a ruling. The title starts `Decide`. | Mission |
 | Bug | Bug | The code is wrong. A bug in a released version goes under that version's Run. | Symptom |
 | Alert | Alert | Something went wrong and a person should look. A machine usually opens it. | Alert |
-| PR Ticket | PR Ticket | The ticket a pull request closes when one change is merged in several repos. | Ruling |
+| PR Ticket | PR Ticket | The ticket a pull request closes when no open ticket fits it, or when one change is merged in several repos. | Ruling |
 
 Goals, Stages, Steps and Quarter Buckets have no form. Board automation makes each of them.
 
