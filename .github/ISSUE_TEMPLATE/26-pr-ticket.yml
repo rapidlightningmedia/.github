@@ -25,7 +25,7 @@ body:
     label: Ruling
     description: "Opens with the line below. Then the ruling this pull request holds, and the origin ticket where the decision lives, as a full link."
     value: |
-      *This ticket exists so the PR in this repo has a ticket to close.* The decision lives on <origin ticket link>.
+      *This ticket exists so the PR has a ticket to close.* The decision lives on <origin ticket link>.
   validations:
     required: true
 - type: textarea
